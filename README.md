@@ -4,11 +4,15 @@
 
 ## 文法
 revappの文法をBNF記法で表すと以下の様になります。
-<expr> ::= "="<identifier> | <identifier> | <expr> <expr>
+
+	<expr> ::= "="<identifier> | <identifier> | <expr> <expr>
+
 ただし、<identifier>は文字数が0以上の文字列とします。 
 結合順位を明示するために括弧を使うことが出来ます。カッコがない場合、全ての構文は右結合優先の原則に従います。例えば"a (=b c)"では、"=b c"を囲むカッコが不要で"a =b c"と書いても同じ意味になります。括弧まで含めた文法は
-1. <term> ::= <identifier> | "="<identifier> |"(" <expr> <expr> ")"
-2. <expr> ::= "(" <expr> ")" <expr> | <term>
+
+	1. <term> ::= <identifier> | "="<identifier> |"(" <expr> <expr> ")"
+	2. <expr> ::= "(" <expr> ")" <expr> | <term>
+
 となります。
 
 ## "revapp"の理由
