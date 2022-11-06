@@ -1,0 +1,62 @@
+#ifndef IOSYSTEM_REVAPP
+#define IOSYSTEM_REVAPP
+
+#include "primitives.revapp"
+#include "numbers.revapp"
+#include "letters.revapp"
+#include "list.revapp"
+
+(-- io system --)=
+
+(=c (=) startworld c errc)=checkpoint
+
+((=self =list =world (=h =t (world h) t self) world list) fix)=iosystem_outseq
+
+(=putc =string (string putc list_map) iosystem_outseq)=string_output_core
+
+(=num
+ (nil (=self =add =unum
+   (=div =mod
+    (add ('0' mod plus) cons)=newtail
+    newtail (div newtail self) div zero big
+   ) undefined unum 10 divmod
+  ) fix
+ )=core
+ (((zero num minus) core) '-' cons)
+ (num core)
+ num zero eqbig
+)=num2str
+
+((zero (=self =num =str
+   (=num =r str num r)=return
+   (=c =tail
+    (c '0' minus)=c
+    (num return)=return
+    (tail ((num 10 mul) c plus) self)=core
+    (return core c zero eqbig) return c 10 eqbig
+   ) (num return) str
+  ) fix
+ )=unum
+ =str
+ (=h =t (str unum) ((=num =rest =r rest (0 num minus) r) t unum) h '-' equal)
+ (=r nil zero r) str
+)=str2num
+
+(zero (=self =num =world (=c =world
+   (=rtn world num rtn)=return
+   ((c '0' minus)=c
+    (world ((num 10 mul) c plus) self)=core
+    (return core c zero eqbig)
+    return c 10 eqbig
+   ) return c isspace
+  ) world getc
+ ) fix
+)=read_unum
+
+(=num
+ (=) (startworld
+  (num num2str) errc string_output_core
+ ) '\n' errc (=) num
+)=checkpoint
+
+#endif /* IOSYSTEM_REVAPP */

@@ -1,0 +1,27 @@
+#ifndef NUMBERS_REVAPP
+#define NUMBERS_REVAPP
+
+#include "primitives.revapp"
+#include "list.revapp"
+
+(-- numbers --)=
+
+zero=0
+(0 one plus)=1
+(1 one plus)=2
+(2 one plus)=3
+(3 one plus)=4
+(4 one plus)=5
+(5 one plus)=6
+(6 one plus)=7
+(7 one plus)=8
+(8 one plus)=9
+(9 one plus)=10
+(=base (=num_list)=
+ 0 (=self =done =num_list
+  (=num (=t)= ((done base mul) num plus) self)
+  done num_list) fix
+)=numeral
+(10 numeral)=decimal
+
+#endif /* NUMBERS_REVAPP*/

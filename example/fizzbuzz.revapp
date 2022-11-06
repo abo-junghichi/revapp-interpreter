@@ -1,0 +1,40 @@
+(=base
+ zero (=self =mod
+  (=car
+   (mod one plus)=next
+   (next zero next base eqbig)=next
+   =r (next self) car r
+  )=next
+  (false next) (true next) zero mod equal
+ ) fix
+)=fizz_list
+
+(=l (=a =d a) l)=car
+(=l (=a =d d) l)=cdr
+
+((3 fizz_list)=fizz
+ (5 fizz_list)=buzz
+ buzz fizz zero (=self =num =f =b
+  ((b cdr) (f cdr) (num one plus) self)=next
+  (b car)=b (f car)=f
+  (((num num2str)
+    ([ 'b' , 'u' , 'z' , 'z' ]) b
+   ) (([ 'f' , 'i' , 'z' , 'z' ])
+    ([ 'f' , 'i' , 'z' , 'z' , '\s' , 'b' , 'u' , 'z' , 'z' ]) b
+   ) f
+  )=head
+  =r next head r
+ ) fix
+)=fizzbuzz
+
+(=string =w
+ (w string putc string_output_core)=w
+ w '\n' putc
+)=print
+
+((fizzbuzz cdr) (=self =fl =world
+  (=h =t
+   (world h print) t self
+  ) fl (=) world
+ ) fix
+) main

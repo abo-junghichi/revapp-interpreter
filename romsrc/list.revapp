@@ -1,0 +1,23 @@
+#ifndef LIST_REVAPP
+#define LIST_REVAPP
+
+#include "primitives.revapp"
+
+(-- list --)=
+(=fornil =forcons fornil)=nil
+(=head =tail =fornil =forcons tail head forcons)=cons
+
+(=done done)=[
+(=done =head =isend (done head cons) isend)=,
+(nil ,)=]
+
+(=func =for_nil (=self =list (=h =t (t self) h func) for_nil list) fix
+)=list_fold
+
+((=self =list (=h =t (t self) one plus) zero list) fix)=list_length
+
+(=heads =tail heads tail cons list_fold)=list_append
+
+(=map nil (=h (h map) cons) list_fold)=list_map
+
+#endif /* LIST_REVAPP */
