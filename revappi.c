@@ -1,10 +1,10 @@
 #include <assert.h>
 #include <stdio.h>
+#define WORD_MEMB void *p; size_t s; int i
+#define WORD_SIZE sizeof(union { WORD_MEMB; })
 typedef union {
-    void *p;
-    size_t s;
-    char m[1];
-    int i;
+    WORD_MEMB;
+    char m[WORD_SIZE];
 } word;
 typedef struct {
     word w[4];
@@ -535,10 +535,11 @@ typedef struct {
     const char *name;
     const word *priminst;
 } prim_env_member;
+#define THUNK_BLOB \
+{ force_other, beta_error, thunk_no_copy, thunk_nop_release }
+static const thunk_type thunk_world = THUNK_BLOB;
 /* #include <embed.c> */
-static const thunk_type thunk_int =
-    { force_other, beta_error, thunk_no_copy, thunk_nop_release },
-    thunk_world = thunk_int;
+static const thunk_type thunk_int = THUNK_BLOB;
 static void *beta_prim_binaryopint(cell * stack, cell * args, word * pip)
 {
     cell *argarray[3], *rtnv = cell_alloc();
@@ -727,24 +728,28 @@ static int place_source(const char *path, const char **sip_p)
     const char *sip = ram->w[0].m;
     size_t brac = 0;
     while (1) {
-	size_t i, byte = fread(cur, 1, sizeof(cell), file);
-	for (i = 0; i < byte; i++)
-	    switch (cur->w[0].m[i]) {
-	    case '(':
-		brac++;
-		break;
-	    case ')':
-		if (0 >= brac)
-		    return 1;
-		brac--;
-		break;
+	size_t n, i, byte;
+	for (n = 0; n < 4; n++) {
+	    byte = fread(&cur->w[n], 1, WORD_SIZE, file);
+	    for (i = 0; i < byte; i++)
+		switch (cur->w[n].m[i]) {
+		case '(':
+		    brac++;
+		    break;
+		case ')':
+		    if (0 >= brac)
+			return 1;
+		    brac--;
+		    break;
+		}
+	    if (WORD_SIZE > byte) {
+		cur->w[n].m[byte] = ')';
+		goto end;
 	    }
-	if (sizeof(cell) > byte) {
-	    cur->w[0].m[byte] = ')';
-	    break;
 	}
 	cur++;
     }
+  end:
     fclose(file);
     if (0 < brac)
 	return 2;

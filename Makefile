@@ -1,6 +1,6 @@
 CC=gcc -Wall -Wextra -Wstrict-aliasing=1 -pedantic
 BUILDCC=$(CC) -O3
-HOSTCC=$(CC) -O0 -g
+HOSTCC=$(CC) -O3
 
 clean:
 	rm *.out romsrc.c
