@@ -1,10 +1,10 @@
 #include <assert.h>
 #include <stdio.h>
-#define WORD_MEMB void *p; size_t s; int i
-#define WORD_SIZE sizeof(union { WORD_MEMB; })
 typedef union {
-    WORD_MEMB;
-    char m[WORD_SIZE];
+    void *p;
+    size_t s;
+    char m[1];
+    int i;
 } word;
 typedef struct {
     word w[4];
@@ -728,28 +728,25 @@ static int place_source(const char *path, const char **sip_p)
     const char *sip = ram->w[0].m;
     size_t brac = 0;
     while (1) {
-	size_t n, i, byte;
-	for (n = 0; n < 4; n++) {
-	    byte = fread(&cur->w[n], 1, WORD_SIZE, file);
-	    for (i = 0; i < byte; i++)
-		switch (cur->w[n].m[i]) {
-		case '(':
-		    brac++;
-		    break;
-		case ')':
-		    if (0 >= brac)
-			return 1;
-		    brac--;
-		    break;
-		}
-	    if (WORD_SIZE > byte) {
-		cur->w[n].m[byte] = ')';
-		goto end;
+	char *curp = cur->w[0].m;
+	size_t i, byte = fread(curp, 1, sizeof(cell), file);
+	for (i = 0; i < byte; i++)
+	    switch (curp[i]) {
+	    case '(':
+		brac++;
+		break;
+	    case ')':
+		if (0 >= brac)
+		    return 1;
+		brac--;
+		break;
 	    }
+	if (sizeof(cell) > byte) {
+	    curp[byte] = ')';
+	    break;
 	}
 	cur++;
     }
-  end:
     fclose(file);
     if (0 < brac)
 	return 2;
