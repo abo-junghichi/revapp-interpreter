@@ -1,0 +1,18 @@
+(=string =w
+ (w string putc string_output_core)=w
+ w '\n' putc
+)=print
+
+((([ 1 , 0 , 0 ]) decimal)=max
+ zero (=self =count =world
+  (count one plus)=count
+  (=base ((=div (=mod)=) undef count base divmod) zero equal)=core
+  ((5 core)=b
+   ((count num2str)
+    ([ 'b' , 'u' , 'z' , 'z' ]) b)
+   (([ 'f' , 'i' , 'z' , 'z' ])
+    ([ 'f' , 'i' , 'z' , 'z' , '\s' , 'b' , 'u' , 'z' , 'z' ])
+    b) 3 core)=rst
+  ((world rst print) count self)
+  world count max big (=) world) fix
+) main
