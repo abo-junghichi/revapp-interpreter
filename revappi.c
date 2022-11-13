@@ -10,8 +10,8 @@ typedef struct {
     word w[4];
 } cell;
 #define RAM_SIZE (100000)
-cell ram[RAM_SIZE];
-cell *free_cell = NULL, *cell_unused;
+static cell ram[RAM_SIZE];
+static cell *free_cell = NULL, *cell_unused;
 static void cell_free(cell * cp)
 {
     cp->w[0].p = free_cell;
