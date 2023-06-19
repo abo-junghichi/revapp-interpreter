@@ -1,0 +1,167 @@
+--- revappi.h	2023-06-20 01:15:45.562648980 +0900
++++ revappi.h.new	2023-06-20 01:15:09.153442578 +0900
+@@ -1,4 +1,5 @@
+ #include <stddef.h>
++#include "system.h"
+ #define PRIM_REGFILE_SIZE 10
+ typedef struct thunk thunk;
+ typedef union {
+@@ -81,5 +82,4 @@
+ } prim_env_member;
+ #define PRIMITIVE(name) { #name "=", prim_##name }
+ #define PRIMITIVE_END { NULL, NULL }
+-int main_core(const prim_env_member * membs, const char *romsrc, int argc,
+-	      char **argv);
++int main_core(const prim_env_member * membs, const char *romsrc);
+--- revappi.c	2023-06-20 01:15:45.562648980 +0900
++++ revappi.c.new	2023-06-20 01:15:09.153442578 +0900
+@@ -1,5 +1,3 @@
+-#include <assert.h>
+-#include <stdio.h>
+ #include "revappi.h"
+ #define RAM_SIZE 100000
+ #define PRIM_REGFILE_SIZE 10
+@@ -12,9 +10,6 @@
+ 	free_cell = rtn->free;
+     else
+ 	rtn = cell_unused++;
+-#ifdef ALLOC_TRACE
+-    fprintf(stderr, "@ a.out + %p 0x%x\n", (void *) rtn, sizeof(cell));
+-#endif
+     return rtn;
+ }
+ void cell_free(void *cellp)
+@@ -22,9 +17,6 @@
+     cell *cp = cellp;
+     cp->free = free_cell;
+     free_cell = cp;
+-#ifdef ALLOC_TRACE
+-    fprintf(stderr, "@ a.out - %p\n", (void *) cp);
+-#endif
+ }
+ static thunk *thunk_alloc(void)
+ {
+@@ -369,15 +361,14 @@
+     list_release(tmp);
+     return beta_force;
+ }
+-static int place_source(const char *path, char **sip_p)
++static int place_source(char **sip_p)
+ {
+     cell *cur = ram;
+-    FILE *file = fopen(path, "r");
+     char *sip = ram[0].m;
+     size_t brac = 0;
+     while (1) {
+ 	char *curp = cur->m;
+-	size_t i, byte = fread(curp, 1, sizeof(cell), file);
++	size_t i, byte = my_read(curp, sizeof(cell));
+ 	for (i = 0; i < byte; i++)
+ 	    switch (curp[i]) {
+ 	    case '(':
+@@ -395,16 +386,9 @@
+ 	}
+ 	cur++;
+     }
+-    fclose(file);
+     if (0 < brac)
+ 	return 2;
+     cell_unused = cur + 1;
+-#ifdef SHEBANG
+-    if ('#' == sip[0] && '!' == sip[1]) {
+-	sip += 2;
+-	while ('\n' != *(sip++));
+-    }
+-#endif				/* SHEBANG */
+     *sip_p = sip;
+     return 0;
+ }
+@@ -432,26 +416,20 @@
+     }
+     return rtn;
+ }
+-int main_core(const prim_env_member *membs, const char *romsrc, int argc,
+-	      char **argv)
++int main_core(const prim_env_member *membs, const char *romsrc)
+ {
+     exec_src_rst rst;
+     char *src;
+     thunk top, *thp;
+     force_regfile r;
+     list *stack = NULL;
+-    if (2 != argc) {
+-	fprintf(stderr, "%s [source file]\n", argv[0]);
+-	return 1;
+-    }
+-    rst = place_source(argv[1], &src);
++    rst = place_source(&src);
+     if (rst)
+ 	return rst + 1;
+     top.tht = &thunk_src;
+     top.c.src.env = gen_prim_env(membs);
+     top.c.src.sip = romsrc;
+     rst = exec_src(&stack, &top.c.src.env, &top.c.src.sip);
+-    assert(exec_src_nop == rst && NULL == stack);
+     top.c.src.sip = src;
+     thp = force(&r, &top);
+     return !(&top == thp && NULL == top.c.force.thp
+--- main.c	2023-06-20 01:10:37.959353695 +0900
++++ main.c.new	2023-06-20 01:10:37.969353477 +0900
+@@ -52,6 +52,7 @@
+     { PIP_POP_THUNK, PIP_CALL(name), PIP_DIST(int) }
+ CONSTINT(0, zero);
+ CONSTINT(1, one);
++#define EOF (-1)
+ CONSTINT(EOF, eof);
+ #define COMPAREINT(OP,name) \
+ static size_t beta_prim_##name(word *r)\
+@@ -93,9 +94,10 @@
+     PIP_POP_THUNK, PIP_POP(world), PIP_POP(world), PIP_CALL(joinworld),
+     PIP_DIST(world)
+ };
+-static size_t beta_primcore_putc(FILE *f, word *r)
++static size_t beta_primcore_putc(int fd, word *r)
+ {
+-    fputc(r[1].i, f);
++    char c = r[1].i;
++    my_write(fd, &c, 1);
+     r[1].thp = r[2].thp;
+     return 0;
+ }
+@@ -108,12 +110,16 @@
+     PIP_POP_THUNK, PIP_POP(int), PIP_POP(world),\
+     PIP_CALL(name), PIP_DIST(world)\
+ }
+-PUTC_CORE(stdout, putc);
+-PUTC_CORE(stderr, errc);
++PUTC_CORE(1, putc);
++PUTC_CORE(2, errc);
+ static size_t beta_prim_getc(word *r)
+ {
++    unsigned char c;
+     r[2].thp = r[1].thp;
+-    r[1].i = fgetc(stdin);
++    if (1 != my_read(&c, 1))
++	r[1].i = EOF;
++    else
++	r[1].i = c;
+     return 0;
+ }
+ static const thunk_type *const dist_getc[] =
+@@ -126,14 +132,11 @@
+     PRIMITIVE(equal), PRIMITIVE(big), PRIMITIVE(eqbig),
+     PRIMITIVE(startworld), PRIMITIVE(forkworld), PRIMITIVE(joinworld),
+     PRIMITIVE(putc),
+-#ifndef ALLOC_TRACE
+     PRIMITIVE(errc),
+-#endif
+     PRIMITIVE(getc),
+     PRIMITIVE_END
+ };
+-int main(int argc, char **argv)
++void _start(void)
+ {
+-    //const char romsrc[] = ")";
+-    return main_core(primitives, romsrc, argc, argv);
++    my_exit(main_core(primitives, romsrc));
+ }
