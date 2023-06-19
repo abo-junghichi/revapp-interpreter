@@ -20,9 +20,9 @@
 (cover zero)=zero
 (cover one)=one
 (=act =pas
- ((((=div =mod
-     =fail =succ (mod cover) (div cover) succ) divmod) act) pas)
- (=fail =succ fail) act zero equal
+ (((=div =mod
+    =fail =succ (mod cover) (div cover) succ)
+   (=fail =succ fail) divmod) act) pas
 )=divmod
 (cover startworld)=startworld
 (=world
