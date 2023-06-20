@@ -89,7 +89,7 @@ static void list_release(list *lp)
     return;
 }
 static beta_rst beta_src(force_regfile *);
-static void thunk_src_copy(thunk_cont cont)
+static void thunk_src_retain(thunk_cont cont)
 {
     list_retain(cont.src.env);
 }
@@ -99,7 +99,7 @@ static list *thunk_src_release(thunk_cont cont)
 }
 #define THUNK_TYPE_SRC(postfix) \
 static const thunk_type thunk_src##postfix =\
-    { beta_src, thunk_src_copy, thunk_src_release }
+    { beta_src, thunk_src_retain, thunk_src_release }
 THUNK_TYPE_SRC();
 THUNK_TYPE_SRC(_done);
 beta_rst beta_undefined(force_regfile *r)
@@ -107,9 +107,9 @@ beta_rst beta_undefined(force_regfile *r)
     return beta_error;
 }
 static const thunk_type thunk_error =
-    { beta_undefined, thunk_src_copy, thunk_src_release };
+    { beta_undefined, thunk_src_retain, thunk_src_release };
 static beta_rst beta_prim(force_regfile *);
-static void thunk_prim_copy(thunk_cont cont)
+static void thunk_prim_retain(thunk_cont cont)
 {
     list_retain(cont.prim.args);
 }
@@ -118,7 +118,7 @@ static list *thunk_prim_release(thunk_cont cont)
     return cont.prim.args;
 }
 static const thunk_type thunk_prim =
-    { beta_prim, thunk_prim_copy, thunk_prim_release };
+    { beta_prim, thunk_prim_retain, thunk_prim_release };
 static thunk *force(force_regfile *r, thunk *thp)
 {
     thunk *tmp;
@@ -138,7 +138,7 @@ static thunk *force(force_regfile *r, thunk *thp)
 	    else {
 		tmp->share--;
 		if (&thunk_src != r->tht)
-		    r->tht->copy(r->thc);
+		    r->tht->retain(r->thc);
 		else {
 		    tmp->c.force.stack = r->stack;
 		    r->stack = NULL;
@@ -153,7 +153,7 @@ static thunk *force(force_regfile *r, thunk *thp)
 	    r->stack = tmp->c.force.stack;
 	    tmp->tht = r->tht;
 	    tmp->c = r->thc;
-	    r->tht->copy(r->thc);
+	    r->tht->retain(r->thc);
 	    if (thp)
 		break;
 	case beta_error:
@@ -408,7 +408,7 @@ static int place_source(const char *path, char **sip_p)
     *sip_p = sip;
     return 0;
 }
-void thunk_nop_copy(thunk_cont c)
+void thunk_nop_retain(thunk_cont c)
 {
     /* return; */
 }
@@ -417,7 +417,7 @@ list *thunk_nop_release(thunk_cont c)
     return NULL;
 }
 const thunk_type thunk_world =
-    { beta_undefined, thunk_nop_copy, thunk_nop_release };
+    { beta_undefined, thunk_nop_retain, thunk_nop_release };
 static list *gen_prim_env(const prim_env_member *membs)
 {
     list *rtn = NULL;

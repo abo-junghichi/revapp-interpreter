@@ -2,7 +2,7 @@
 #include "revappi.h"
 #include "romsrc.c"
 static const thunk_type thunk_int =
-    { beta_undefined, thunk_nop_copy, thunk_nop_release };
+    { beta_undefined, thunk_nop_retain, thunk_nop_release };
 static const thunk_type *const dist_int[] = { &thunk_int, NULL };
 #define BINARYOPINT(OP,name) \
 static size_t beta_prim_##name(word *r)\

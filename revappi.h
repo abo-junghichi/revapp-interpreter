@@ -50,7 +50,7 @@ typedef struct {
 typedef enum { beta_force, beta_done, beta_error } beta_rst;
 struct thunk_type {
     beta_rst(*beta) (force_regfile *);
-    void (*copy)(thunk_cont);
+    void (*retain)(thunk_cont);
     list *(*release)(thunk_cont);
 };
 struct thunk {
@@ -72,7 +72,7 @@ void cell_free(void *);
 #define PIP_POP_THUNK {NULL,NULL}
 #define PIP_CALL(func_stem) {NULL,beta_prim_##func_stem}
 beta_rst beta_undefined(force_regfile *);
-void thunk_nop_copy(thunk_cont);
+void thunk_nop_retain(thunk_cont);
 list *thunk_nop_release(thunk_cont);
 extern const thunk_type thunk_world;
 typedef struct {
