@@ -11,10 +11,15 @@ static int syscall3(int syscall, int arg1, int arg2, int arg3)
 }
 size_t my_read(void *buf, size_t count)
 {
-    int ret = syscall3(SYS_read, 0, buf, count);
-    if (0 > ret)
-	ret = 0;
-    return ret;
+    char *buf_start = buf, *buf_done = buf;
+    while (0 < count) {
+	int rst = syscall3(SYS_read, 0, buf_done, count);
+	if (0 >= rst)
+	    break;
+	buf_done += rst;
+	count -= rst;
+    }
+    return buf_done - buf_start;
 }
 void my_write(int fd, const void *buf, size_t count)
 {
