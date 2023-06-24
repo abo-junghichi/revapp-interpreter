@@ -1,5 +1,5 @@
---- revappi.h	2023-06-20 01:15:45.562648980 +0900
-+++ revappi.h.new	2023-06-20 01:15:09.153442578 +0900
+--- revappi.h	2023-06-25 01:29:22.655494099 +0900
++++ revappi.h.new	2023-06-25 01:24:22.511919724 +0900
 @@ -1,4 +1,5 @@
  #include <stddef.h>
 +#include "system.h"
@@ -13,25 +13,25 @@
 -int main_core(const prim_env_member * membs, const char *romsrc, int argc,
 -	      char **argv);
 +int main_core(const prim_env_member * membs, const char *romsrc);
---- revappi.c	2023-06-20 01:15:45.562648980 +0900
-+++ revappi.c.new	2023-06-20 01:15:09.153442578 +0900
+--- revappi.c	2023-06-25 01:29:22.665493886 +0900
++++ revappi.c.new	2023-06-25 01:28:07.457097102 +0900
 @@ -1,5 +1,3 @@
 -#include <assert.h>
 -#include <stdio.h>
  #include "revappi.h"
  #define RAM_SIZE 100000
  #define PRIM_REGFILE_SIZE 10
-@@ -12,9 +10,6 @@
+@@ -13,9 +11,6 @@
  	free_cell = rtn->free;
-     else
- 	rtn = cell_unused++;
+     else if (cell_for_chunk < cell_used)
+ 	rtn = --cell_used;
 -#ifdef ALLOC_TRACE
 -    fprintf(stderr, "@ a.out + %p 0x%x\n", (void *) rtn, sizeof(cell));
 -#endif
      return rtn;
  }
  void cell_free(void *cellp)
-@@ -22,9 +17,6 @@
+@@ -23,9 +18,6 @@
      cell *cp = cellp;
      cp->free = free_cell;
      free_cell = cp;
@@ -41,7 +41,7 @@
  }
  static thunk *thunk_alloc(void)
  {
-@@ -369,15 +361,14 @@
+@@ -370,15 +362,14 @@
      list_release(tmp);
      return beta_force;
  }
@@ -59,14 +59,14 @@
  	for (i = 0; i < byte; i++)
  	    switch (curp[i]) {
  	    case '(':
-@@ -395,16 +386,9 @@
+@@ -396,16 +387,9 @@
  	}
  	cur++;
      }
 -    fclose(file);
      if (0 < brac)
  	return 2;
-     cell_unused = cur + 1;
+     cell_for_chunk = cur + 1;
 -#ifdef SHEBANG
 -    if ('#' == sip[0] && '!' == sip[1]) {
 -	sip += 2;
@@ -76,7 +76,7 @@
      *sip_p = sip;
      return 0;
  }
-@@ -432,26 +416,20 @@
+@@ -433,26 +417,20 @@
      }
      return rtn;
  }
@@ -105,8 +105,8 @@
      top.c.src.sip = src;
      thp = force(&r, &top);
      return !(&top == thp && NULL == top.c.force.thp
---- main.c	2023-06-20 01:10:37.959353695 +0900
-+++ main.c.new	2023-06-20 01:10:37.969353477 +0900
+--- main.c	2023-06-25 01:29:22.695493246 +0900
++++ main.c.new	2023-06-25 01:24:22.511919724 +0900
 @@ -52,6 +52,7 @@
      { PIP_POP_THUNK, PIP_CALL(name), PIP_DIST(int) }
  CONSTINT(0, zero);

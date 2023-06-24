@@ -3,15 +3,16 @@
 #include "revappi.h"
 #define RAM_SIZE 100000
 #define PRIM_REGFILE_SIZE 10
-static cell *free_cell = NULL, *cell_unused;
 static cell ram[RAM_SIZE];
+static cell *free_cell = NULL, *cell_for_chunk, *cell_used =
+    &ram[RAM_SIZE];
 cell *cell_alloc(void)
 {
     cell *rtn = free_cell;
     if (rtn)
 	free_cell = rtn->free;
-    else
-	rtn = cell_unused++;
+    else if (cell_for_chunk < cell_used)
+	rtn = --cell_used;
 #ifdef ALLOC_TRACE
     fprintf(stderr, "@ a.out + %p 0x%x\n", (void *) rtn, sizeof(cell));
 #endif
@@ -398,7 +399,7 @@ static int place_source(const char *path, char **sip_p)
     fclose(file);
     if (0 < brac)
 	return 2;
-    cell_unused = cur + 1;
+    cell_for_chunk = cur + 1;
 #ifdef SHEBANG
     if ('#' == sip[0] && '!' == sip[1]) {
 	sip += 2;
