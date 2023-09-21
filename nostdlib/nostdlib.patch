@@ -1,5 +1,5 @@
---- revappi.h	2023-06-25 01:29:22.655494099 +0900
-+++ revappi.h.new	2023-06-25 01:24:22.511919724 +0900
+--- revappi.h	2023-09-21 18:59:10.981646373 +0900
++++ revappi.h.new	2023-09-21 18:44:38.209605170 +0900
 @@ -1,4 +1,5 @@
  #include <stddef.h>
 +#include "system.h"
@@ -13,15 +13,22 @@
 -int main_core(const prim_env_member * membs, const char *romsrc, int argc,
 -	      char **argv);
 +int main_core(const prim_env_member * membs, const char *romsrc);
---- revappi.c	2023-06-25 01:29:22.665493886 +0900
-+++ revappi.c.new	2023-06-25 01:28:07.457097102 +0900
-@@ -1,5 +1,3 @@
+--- revappi.c	2023-09-21 18:59:10.991646175 +0900
++++ revappi.c.new	2023-09-21 18:58:03.332985641 +0900
+@@ -1,11 +1,8 @@
 -#include <assert.h>
 -#include <stdio.h>
  #include "revappi.h"
  #define RAM_SIZE 100000
  #define PRIM_REGFILE_SIZE 10
-@@ -13,9 +11,6 @@
+ static cell ram[RAM_SIZE];
+-static cell *free_cell = NULL, *cell_for_chunk, *cell_used =
+-    &ram[RAM_SIZE];
++static cell *free_cell = NULL, *cell_for_chunk, *cell_used;
+ cell *cell_alloc(void)
+ {
+     cell *rtn = free_cell;
+@@ -13,9 +10,6 @@
  	free_cell = rtn->free;
      else if (cell_for_chunk < cell_used)
  	rtn = --cell_used;
@@ -31,7 +38,7 @@
      return rtn;
  }
  void cell_free(void *cellp)
-@@ -23,9 +18,6 @@
+@@ -23,9 +17,6 @@
      cell *cp = cellp;
      cp->free = free_cell;
      free_cell = cp;
@@ -41,7 +48,7 @@
  }
  static thunk *thunk_alloc(void)
  {
-@@ -370,15 +362,14 @@
+@@ -370,15 +361,14 @@
      list_release(tmp);
      return beta_force;
  }
@@ -59,7 +66,7 @@
  	for (i = 0; i < byte; i++)
  	    switch (curp[i]) {
  	    case '(':
-@@ -396,16 +387,9 @@
+@@ -396,16 +386,9 @@
  	}
  	cur++;
      }
@@ -76,7 +83,7 @@
      *sip_p = sip;
      return 0;
  }
-@@ -433,26 +417,20 @@
+@@ -433,26 +416,21 @@
      }
      return rtn;
  }
@@ -94,6 +101,7 @@
 -	return 1;
 -    }
 -    rst = place_source(argv[1], &src);
++    cell_used = &ram[RAM_SIZE];
 +    rst = place_source(&src);
      if (rst)
  	return rst + 1;
@@ -105,8 +113,8 @@
      top.c.src.sip = src;
      thp = force(&r, &top);
      return !(&top == thp && NULL == top.c.force.thp
---- main.c	2023-06-25 01:29:22.695493246 +0900
-+++ main.c.new	2023-06-25 01:24:22.511919724 +0900
+--- main.c	2023-09-21 18:59:11.001645977 +0900
++++ main.c.new	2023-09-21 18:44:38.209605170 +0900
 @@ -52,6 +52,7 @@
      { PIP_POP_THUNK, PIP_CALL(name), PIP_DIST(int) }
  CONSTINT(0, zero);
