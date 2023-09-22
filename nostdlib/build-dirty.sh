@@ -15,5 +15,5 @@ LINE=$(readelf -l revappi.out | grep 'R E')
 OFFSET=$(echo $LINE | cut -f2 -dx | hexcapitalize)
 LENGTH=$(echo $LINE | cut -f5 -dx | hexcapitalize)
 SIZE=$(echo "ibase=16 ; $OFFSET + $LENGTH" | bc )
-dd if=revappi.out of=revappi.out.trunc bs=1c count=$SIZE
+dd if=revappi.out of=revappi.out.trunc bs=$SIZE count=1
 chmod +x revappi.out.trunc
