@@ -7,13 +7,28 @@ do
 	-static -nostdlib -fno-pie $f.c -S -o /dev/stdout | \
 	sed 's/.rodata/.text/g' >$f.s
 done
-gcc -static -nostdlib -fno-pie *.s -o revappi.out
-hexcapitalize(){
-        cut -f1 -d\  | tr 'abcdef' 'ABCDEF'
+dash elfheader.sh 0 0 0 0 > elfheader.s
+assemble(){
+	gcc -static -nostdlib -fno-pie \
+		elfheader.s system-i386.s revappi.s main.s -o revappi.out
 }
-LINE=$(readelf -l revappi.out | grep 'R E')
-OFFSET=$(echo $LINE | cut -f2 -dx | hexcapitalize)
-LENGTH=$(echo $LINE | cut -f5 -dx | hexcapitalize)
-SIZE=$(echo "ibase=16 ; $OFFSET + $LENGTH" | bc )
-dd if=revappi.out of=revappi.out.trunc bs=$SIZE count=1
+assemble
+TEXT=$(readelf -l revappi.out | grep 'LOAD .* R E')
+BSS=$(readelf -l revappi.out | grep 'LOAD .* RW ')
+ph_cut(){
+        cut -f$1 -dx | cut -f1 -d\ 
+}
+TEXT_ADDR=$(echo $TEXT | ph_cut 3)
+TEXT_SIZE=$(echo $TEXT | ph_cut 6)
+BSS_ADDR=$(echo $BSS | ph_cut 3)
+BSS_SIZE=$(echo $BSS | ph_cut 6)
+sh elfheader.sh $TEXT_ADDR $TEXT_SIZE $BSS_ADDR $BSS_SIZE > elfheader.s
+assemble
+hexcapitalize(){
+        tr 'abcdef' 'ABCDEF'
+}
+LENGTH=$(echo $TEXT_SIZE | hexcapitalize)
+SIZE=$(echo "ibase=16 ; $LENGTH" | bc )
+dd if=revappi.out of=revappi.out.trunc bs=4096 skip=1
+truncate --size=$SIZE revappi.out.trunc
 chmod +x revappi.out.trunc
