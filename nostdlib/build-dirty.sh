@@ -7,7 +7,7 @@ do
 	-static -nostdlib -fno-pie $f.c -S -o /dev/stdout | \
 	sed 's/.rodata/.text/g' >$f.s
 done
-dash elfheader.sh 0 0 0 0 > elfheader.s
+sh elfheader.sh 0 0 0 0 > elfheader.s
 assemble(){
 	gcc -static -nostdlib -fno-pie \
 		elfheader.s system-i386.s revappi.s main.s -o revappi.out
@@ -24,10 +24,7 @@ BSS_ADDR=$(echo $BSS | ph_cut 3)
 BSS_SIZE=$(echo $BSS | ph_cut 6)
 sh elfheader.sh $TEXT_ADDR $TEXT_SIZE $BSS_ADDR $BSS_SIZE > elfheader.s
 assemble
-hexcapitalize(){
-        tr 'abcdef' 'ABCDEF'
-}
-LENGTH=$(echo $TEXT_SIZE | hexcapitalize)
+LENGTH=$(echo $TEXT_SIZE | tr 'abcdef' 'ABCDEF')
 SIZE=$(echo "ibase=16 ; $LENGTH" | bc )
 dd if=revappi.out of=revappi.out.trunc bs=4096 skip=1
 truncate --size=$SIZE revappi.out.trunc
