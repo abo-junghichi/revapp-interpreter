@@ -5,7 +5,7 @@ for f in system-i386 revappi main
 do
 	gcc -Os -Wall -pedantic -Wextra -Wstrict-aliasing=1 \
 		-static -nostdlib -fno-builtin -fno-pie -S \
-		$f.c -o /dev/stdout | \
+		-DSHEBANG $f.c -o /dev/stdout | \
 	sed 's/.rodata/.text/g' >$f.s
 done
 sh elfheader.sh 0 0 0 0 > elfheader.s
