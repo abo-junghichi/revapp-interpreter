@@ -4,10 +4,10 @@ subst () {
 }
 <<END subst TEXT_ADDR $1 | subst TEXT_SIZE $2 \
 	| subst BSS_ADDR $3 | subst BSS_SIZE $4
-	.file   "elfheader.s"
-        .text
-	.globl  my_elfheader
-	.type   my_elfheader, @function
+	.file	"elfheader.s"
+	.section	.text.startup,"ax",@progbits
+	.globl	my_elfheader
+	.type	my_elfheader, @function
 my_elfheader:
 	.byte 0x7f, 'E', 'L', 'F', 1, 1, 1, 0
 	.long 0, 0
@@ -42,6 +42,6 @@ my_elfheader:
 	.long 0xBSS_SIZE
 	.long 6
 	.long 0x1000
-	.size  my_elfheader, .-my_elfheader
-        .section        .note.GNU-stack,"",@progbits
+	.size	my_elfheader, .-my_elfheader
+	.section	.note.GNU-stack,"",@progbits
 END

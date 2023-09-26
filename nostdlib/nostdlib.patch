@@ -1,20 +1,13 @@
---- revappi.h	2023-09-21 18:59:10.981646373 +0900
-+++ revappi.h.new	2023-09-21 18:44:38.209605170 +0900
+--- revappi.h	2023-09-27 00:54:48.247122109 +0900
++++ revappi.h.new	2023-09-27 00:37:28.167736542 +0900
 @@ -1,4 +1,5 @@
  #include <stddef.h>
 +#include "system.h"
  #define PRIM_REGFILE_SIZE 10
  typedef struct thunk thunk;
  typedef union {
-@@ -81,5 +82,4 @@
- } prim_env_member;
- #define PRIMITIVE(name) { #name "=", prim_##name }
- #define PRIMITIVE_END { NULL, NULL }
--int main_core(const prim_env_member * membs, const char *romsrc, int argc,
--	      char **argv);
-+int main_core(const prim_env_member * membs, const char *romsrc);
---- revappi.c	2023-09-21 18:59:10.991646175 +0900
-+++ revappi.c.new	2023-09-21 18:58:03.332985641 +0900
+--- revappi.c	2023-09-27 00:54:48.257121901 +0900
++++ revappi.c.new	2023-09-27 00:48:22.755034392 +0900
 @@ -1,11 +1,8 @@
 -#include <assert.h>
 -#include <stdio.h>
@@ -48,64 +41,57 @@
  }
  static thunk *thunk_alloc(void)
  {
-@@ -370,15 +361,14 @@
-     list_release(tmp);
-     return beta_force;
- }
--static int place_source(const char *path, char **sip_p)
-+static int place_source(char **sip_p)
+@@ -373,12 +364,12 @@
+ static int place_source(const char *path, char **sip_p)
  {
      cell *cur = ram;
 -    FILE *file = fopen(path, "r");
++    int file = my_open(path);
      char *sip = ram[0].m;
      size_t brac = 0;
      while (1) {
  	char *curp = cur->m;
 -	size_t i, byte = fread(curp, 1, sizeof(cell), file);
-+	size_t i, byte = my_read(curp, sizeof(cell));
++	size_t i, byte = my_read(file, curp, sizeof(cell));
  	for (i = 0; i < byte; i++)
  	    switch (curp[i]) {
  	    case '(':
-@@ -396,16 +386,9 @@
+@@ -396,7 +387,7 @@
  	}
  	cur++;
      }
 -    fclose(file);
++    my_close(file);
      if (0 < brac)
  	return 2;
      cell_for_chunk = cur + 1;
--#ifdef SHEBANG
--    if ('#' == sip[0] && '!' == sip[1]) {
--	sip += 2;
--	while ('\n' != *(sip++));
--    }
--#endif				/* SHEBANG */
-     *sip_p = sip;
-     return 0;
- }
-@@ -433,26 +416,21 @@
+@@ -433,6 +424,12 @@
      }
      return rtn;
  }
--int main_core(const prim_env_member *membs, const char *romsrc, int argc,
--	      char **argv)
-+int main_core(const prim_env_member *membs, const char *romsrc)
++static void print_error(const char *msg)
++{
++    size_t msg_len;
++    for (msg_len = 0; '\0' != msg[msg_len]; msg_len++);
++    my_write(my_stderr, msg, msg_len);
++}
+ int main_core(const prim_env_member *membs, const char *romsrc, int argc,
+ 	      char **argv)
  {
-     exec_src_rst rst;
-     char *src;
-     thunk top, *thp;
+@@ -442,9 +439,11 @@
      force_regfile r;
      list *stack = NULL;
--    if (2 != argc) {
+     if (2 != argc) {
 -	fprintf(stderr, "%s [source file]\n", argv[0]);
--	return 1;
--    }
--    rst = place_source(argv[1], &src);
++	print_error(argv[0]);
++	print_error(" [source file]\n");
+ 	return 1;
+     }
 +    cell_used = &ram[RAM_SIZE];
-+    rst = place_source(&src);
+     rst = place_source(argv[1], &src);
      if (rst)
  	return rst + 1;
-     top.tht = &thunk_src;
+@@ -452,7 +451,6 @@
      top.c.src.env = gen_prim_env(membs);
      top.c.src.sip = romsrc;
      rst = exec_src(&stack, &top.c.src.env, &top.c.src.sip);
@@ -113,9 +99,14 @@
      top.c.src.sip = src;
      thp = force(&r, &top);
      return !(&top == thp && NULL == top.c.force.thp
---- main.c	2023-09-21 18:59:11.001645977 +0900
-+++ main.c.new	2023-09-21 18:44:38.209605170 +0900
-@@ -52,6 +52,7 @@
+--- main.c	2023-09-27 00:54:48.287121279 +0900
++++ main.c.new	2023-09-27 00:50:05.162995704 +0900
+@@ -1,4 +1,3 @@
+-#include <stdio.h>
+ #include "revappi.h"
+ #include "romsrc.c"
+ static const thunk_type thunk_int =
+@@ -52,6 +51,7 @@
      { PIP_POP_THUNK, PIP_CALL(name), PIP_DIST(int) }
  CONSTINT(0, zero);
  CONSTINT(1, one);
@@ -123,7 +114,7 @@
  CONSTINT(EOF, eof);
  #define COMPAREINT(OP,name) \
  static size_t beta_prim_##name(word *r)\
-@@ -93,9 +94,10 @@
+@@ -93,9 +93,10 @@
      PIP_POP_THUNK, PIP_POP(world), PIP_POP(world), PIP_CALL(joinworld),
      PIP_DIST(world)
  };
@@ -136,27 +127,27 @@
      r[1].thp = r[2].thp;
      return 0;
  }
-@@ -108,12 +110,16 @@
+@@ -108,12 +109,16 @@
      PIP_POP_THUNK, PIP_POP(int), PIP_POP(world),\
      PIP_CALL(name), PIP_DIST(world)\
  }
 -PUTC_CORE(stdout, putc);
 -PUTC_CORE(stderr, errc);
-+PUTC_CORE(1, putc);
-+PUTC_CORE(2, errc);
++PUTC_CORE(my_stdout, putc);
++PUTC_CORE(my_stderr, errc);
  static size_t beta_prim_getc(word *r)
  {
 +    unsigned char c;
      r[2].thp = r[1].thp;
 -    r[1].i = fgetc(stdin);
-+    if (1 != my_read(&c, 1))
++    if (1 != my_read(my_stdin, &c, 1))
 +	r[1].i = EOF;
 +    else
 +	r[1].i = c;
      return 0;
  }
  static const thunk_type *const dist_getc[] =
-@@ -126,14 +132,11 @@
+@@ -126,9 +131,7 @@
      PRIMITIVE(equal), PRIMITIVE(big), PRIMITIVE(eqbig),
      PRIMITIVE(startworld), PRIMITIVE(forkworld), PRIMITIVE(joinworld),
      PRIMITIVE(putc),
@@ -166,10 +157,3 @@
      PRIMITIVE(getc),
      PRIMITIVE_END
  };
--int main(int argc, char **argv)
-+void _start(void)
- {
--    //const char romsrc[] = ")";
--    return main_core(primitives, romsrc, argc, argv);
-+    my_exit(main_core(primitives, romsrc));
- }
