@@ -1,5 +1,5 @@
 # ラムダ計算プログラミング言語 "revapp"の、最低限のインタプリタ実装
-式の結合法則を右結合に揃えたラムダ式に基づき、評価戦略に必要呼びを用いることで、簡潔さを図ったプログラミング言語。
+式の結合法則を右結合に揃えたラムダ計算の表記法[De Bruijn notation](https://en.wikipedia.org/wiki/De_Bruijn_notation)に基づき、評価戦略に必要呼びを用いることで、簡潔さを図ったプログラミング言語。
 そしてその言語で書かれたソースコードを、中間表現に変換することなくそのままメモリ上にコピーして解釈実行する、最低限の言語処理系。
 
 ## 動作テスト
@@ -17,18 +17,60 @@ GNU C コンパイラがセットアップ済みのUnix環境での場合
 
 	$ ./example/cat.revapp < Makefile
 
+### 静的リンクのLinux-i386用極小バイナリ
+バイナリ構築の前に、組み込みrevappソースコードのC言語が必要です。
+
+	$ make romsrc.c
+
+nostdlibディレクトリでバイナリを構築します。
+
+	$ cd nostdlib
+	$ sh build-dirty.sh
+	$ cd ..
+
+使い方は通常版と同じです。
+
+	$ du -b nostdlib/revappi.out.trunc
+	8668 nostdlib/revappi.out.trunc
+	$ ln -s nostdlib/revappi.out.trunc revappi.out
+	$ ./revappi.out example/fizzbuzz100.revapp
+	$ ./example/cat.revapp < Makefile
+
+組み込みrevappソースコードを削除することで、バイナリサイズを減らせます。
+
+	$ make img2c.out
+	$ printf "" | ./img2c.out > romsrc.c
+	$ cd nostdlib
+	$ sh build-dirty.sh
+	$ cd ..
+	$ do -b nostdlib/revappi.out.trunc
+	3945 nostdlib/revappi.out.trunc
+
+使うときは、組み込みrevappソースコードを先に読み込ませる必要があります。
+
+	$ make romsrc/romsrc.revapp
+	$ cat romsrc/romsrc.revapp example/fizzbuzz100.revapp | ./nostdlib/revappi.out.trunc /dev/stdin
+
 ## 文法
-revappの文法をBNF記法で表すと以下の様になります。
+revappの文法をBNF記法で表すと、De Bruijn notationとよく似たものになります。
 
-	<expr> ::= "="<identifier> | <identifier> | <expr> <expr>
+	<expr> ::= "="<identifier> | <identifier> | ( <expr> ) <expr> | 空文字列
 
-ただし、`<identifier>`は文字数が0以上の文字列とします。 
-結合順位を明示するために括弧を使うことが出来ます。カッコがない場合、全ての構文は右結合優先の原則に従います。例えば"a (=b c)"では、"=b c"を囲むカッコが不要で"a =b c"と書いても同じ意味になります。括弧まで含めた文法は
+ただし、`<identifier>`は文字数が0以上の文字列とします。
+すなわち、`<expr>`には0文字の空文字列が使用できます。
 
-	1. <term> ::= <identifier> | "="<identifier> |"(" <expr> <expr> ")"
-	2. <expr> ::= "(" <expr> ")" <expr> | <term>
+関数として空文字列を使用すると、
+「( `<expr>` ) 空文字列」は「( `<expr>` )」とrevappに解釈され、
+右結合優先の文法しかない当言語では冗長な括弧が取り除かれて、
+空文字列は恒等関数「=x x」と同じ動作となります。
 
-となります。
+引数として、空文字列すなわち恒等関数を表記すると、
+先のBNF記法で示されている様に、全ての引数には括弧が必要なので、
+中身のない括弧のペア「()」となります。
+
+また、空文字列の変数は表記できないので、
+`<identifier>`が空文字列のラムダ抽象「=」により束縛された引数は、
+そのラムダ抽象が有効な名前空間からは参照されません。
 
 ## "revapp"の理由
 或いは、「ラムダ式」の何処が間違っていたのかについて。
