@@ -27,11 +27,11 @@ nostdlibディレクトリでバイナリを構築します。
 	$ cd nostdlib
 	$ sh build-dirty.sh
 	$ cd ..
+	$ du -b nostdlib/revappi.out.trunc
+	8668 nostdlib/revappi.out.trunc
 
 使い方は通常版と同じです。
 
-	$ du -b nostdlib/revappi.out.trunc
-	8668 nostdlib/revappi.out.trunc
 	$ ln -s nostdlib/revappi.out.trunc revappi.out
 	$ ./revappi.out example/fizzbuzz100.revapp
 	$ ./example/cat.revapp < Makefile
@@ -54,23 +54,21 @@ nostdlibディレクトリでバイナリを構築します。
 ## 文法
 revappの文法をBNF記法で表すと、De Bruijn notationとよく似たものになります。
 
-	<expr> ::= "="<identifier> | <identifier> | ( <expr> ) <expr> | 空文字列
+	<expr> ::=
+	  "="<0文字以上のidentifier> <expr>
+	| "(" <expr> ")" <expr>
+	| <1文字以上のidentifier> <expr>
+	| 空文字列
 
-ただし、`<identifier>`は文字数が0以上の文字列とします。
-すなわち、`<expr>`には0文字の空文字列が使用できます。
-
-関数として空文字列を使用すると、
-「( `<expr>` ) 空文字列」は「( `<expr>` )」とrevappに解釈され、
-右結合優先の文法しかない当言語では冗長な括弧が取り除かれて、
-空文字列は恒等関数「=x x」と同じ動作となります。
-
-引数として、空文字列すなわち恒等関数を表記すると、
-先のBNF記法で示されている様に、全ての引数には括弧が必要なので、
-中身のない括弧のペア「()」となります。
+すなわち、`<expr>`は必ず空文字列で終了する、と構文解析されます。
+このようにDe Bruijn notationを解釈することで、
+`<expr>`の終了処理を空文字列のみに集中でき、インタプリタ実装を単純化できます。
+副産物として、中身のない括弧のペア「()」は恒等関数を表します。
 
 また、空文字列の変数は表記できないので、
 `<identifier>`が空文字列のラムダ抽象「=」により束縛された引数は、
 そのラムダ抽象が有効な名前空間からは参照されません。
+これを応用して「(」と「)=」で囲むことで、コメント表記が可能になります。
 
 ## "revapp"の理由
 或いは、「ラムダ式」の何処が間違っていたのかについて。
