@@ -18,7 +18,8 @@ GNU C コンパイラがセットアップ済みのUnix環境での場合
 	$ ./example/cat.revapp < Makefile
 
 ### 静的リンクのLinux-i386用極小バイナリ
-バイナリ構築の前に、組み込みrevappソースコードのC言語が必要です。
+バイナリ構築の前に、
+組み込みrevappソースコードをC言語処理系から扱える形に変換します。
 
 	$ make romsrc.c
 
