@@ -1,37 +1,24 @@
---- revappi.h	2023-09-27 00:54:48.247122109 +0900
-+++ revappi.h.new	2023-09-27 00:37:28.167736542 +0900
-@@ -1,4 +1,5 @@
- #include <stddef.h>
-+#include "system.h"
- #define PRIM_REGFILE_SIZE 10
- typedef struct thunk thunk;
- typedef union {
---- revappi.c	2023-09-27 00:54:48.257121901 +0900
-+++ revappi.c.new	2023-09-27 00:48:22.755034392 +0900
-@@ -1,11 +1,8 @@
+--- revappi.c	2023-11-16 21:46:58.767744413 +0900
++++ revappi.c.new	2023-11-16 21:45:19.059813515 +0900
+@@ -1,7 +1,3 @@
 -#include <assert.h>
+-#ifdef ALLOC_TRACE
 -#include <stdio.h>
+-#endif
  #include "revappi.h"
- #define RAM_SIZE 100000
- #define PRIM_REGFILE_SIZE 10
- static cell ram[RAM_SIZE];
--static cell *free_cell = NULL, *cell_for_chunk, *cell_used =
--    &ram[RAM_SIZE];
-+static cell *free_cell = NULL, *cell_for_chunk, *cell_used;
- cell *cell_alloc(void)
- {
-     cell *rtn = free_cell;
-@@ -13,9 +10,6 @@
- 	free_cell = rtn->free;
-     else if (cell_for_chunk < cell_used)
- 	rtn = --cell_used;
+ static cell *free_cell =
+     NULL, *cell_spare, *cell_limit, *(*cell_runout)(void);
+@@ -20,9 +16,6 @@
+ 	rtn = cell_spare++;
+     else
+ 	rtn = cell_runout();
 -#ifdef ALLOC_TRACE
 -    fprintf(stderr, "@ a.out + %p 0x%x\n", (void *) rtn, sizeof(cell));
 -#endif
      return rtn;
  }
  void cell_free(void *cellp)
-@@ -23,9 +17,6 @@
+@@ -30,9 +23,6 @@
      cell *cp = cellp;
      cp->free = free_cell;
      free_cell = cp;
@@ -41,72 +28,23 @@
  }
  static thunk *thunk_alloc(void)
  {
-@@ -373,12 +364,12 @@
- static int place_source(const char *path, char **sip_p)
- {
-     cell *cur = ram;
--    FILE *file = fopen(path, "r");
-+    int file = my_open(path);
-     char *sip = ram[0].m;
-     size_t brac = 0;
-     while (1) {
- 	char *curp = cur->m;
--	size_t i, byte = fread(curp, 1, sizeof(cell), file);
-+	size_t i, byte = my_read(file, curp, sizeof(cell));
- 	for (i = 0; i < byte; i++)
- 	    switch (curp[i]) {
- 	    case '(':
-@@ -396,7 +387,7 @@
- 	}
- 	cur++;
-     }
--    fclose(file);
-+    my_close(file);
-     if (0 < brac)
- 	return 2;
-     cell_for_chunk = cur + 1;
-@@ -433,6 +424,12 @@
-     }
-     return rtn;
- }
-+static void print_error(const char *msg)
-+{
-+    size_t msg_len;
-+    for (msg_len = 0; '\0' != msg[msg_len]; msg_len++);
-+    my_write(my_stderr, msg, msg_len);
-+}
- int main_core(const prim_env_member *membs, const char *romsrc, int argc,
- 	      char **argv)
- {
-@@ -442,9 +439,11 @@
-     force_regfile r;
-     list *stack = NULL;
-     if (2 != argc) {
--	fprintf(stderr, "%s [source file]\n", argv[0]);
-+	print_error(argv[0]);
-+	print_error(" [source file]\n");
- 	return 1;
-     }
-+    cell_used = &ram[RAM_SIZE];
-     rst = place_source(argv[1], &src);
-     if (rst)
- 	return rst + 1;
-@@ -452,7 +451,6 @@
+@@ -412,7 +402,6 @@
      top.c.src.env = gen_prim_env(membs);
      top.c.src.sip = romsrc;
      rst = exec_src(&stack, &top.c.src.env, &top.c.src.sip);
 -    assert(exec_src_nop == rst && NULL == stack);
-     top.c.src.sip = src;
+     top.c.src.sip = ramsrc;
      thp = force(&r, &top);
      return !(&top == thp && NULL == top.c.force.thp
---- main.c	2023-09-27 00:54:48.287121279 +0900
-+++ main.c.new	2023-09-27 00:50:05.162995704 +0900
-@@ -1,4 +1,3 @@
+--- main.c	2023-11-16 21:46:58.787743998 +0900
++++ main.c.new	2023-11-16 21:46:45.488019989 +0900
+@@ -1,4 +1,4 @@
 -#include <stdio.h>
++#include "system.h"
  #include "revappi.h"
  #include "romsrc.c"
  static const thunk_type thunk_int =
-@@ -52,6 +51,7 @@
+@@ -52,6 +52,7 @@
      { PIP_POP_THUNK, PIP_CALL(name), PIP_DIST(int) }
  CONSTINT(0, zero);
  CONSTINT(1, one);
@@ -114,7 +52,7 @@
  CONSTINT(EOF, eof);
  #define COMPAREINT(OP,name) \
  static size_t beta_prim_##name(word *r)\
-@@ -93,9 +93,10 @@
+@@ -93,9 +94,10 @@
      PIP_POP_THUNK, PIP_POP(world), PIP_POP(world), PIP_CALL(joinworld),
      PIP_DIST(world)
  };
@@ -127,7 +65,7 @@
      r[1].thp = r[2].thp;
      return 0;
  }
-@@ -108,12 +109,16 @@
+@@ -108,12 +110,16 @@
      PIP_POP_THUNK, PIP_POP(int), PIP_POP(world),\
      PIP_CALL(name), PIP_DIST(world)\
  }
@@ -147,7 +85,7 @@
      return 0;
  }
  static const thunk_type *const dist_getc[] =
-@@ -126,9 +131,7 @@
+@@ -126,9 +132,7 @@
      PRIMITIVE(equal), PRIMITIVE(big), PRIMITIVE(eqbig),
      PRIMITIVE(startworld), PRIMITIVE(forkworld), PRIMITIVE(joinworld),
      PRIMITIVE(putc),
@@ -157,3 +95,49 @@
      PRIMITIVE(getc),
      PRIMITIVE_END
  };
+@@ -137,12 +141,12 @@
+ static int place_source(const char *path, const char **sip_p)
+ {
+     cell *cur = ram;
+-    FILE *file = fopen(path, "r");
++    int file = my_open(path);
+     char *sip = ram[0].m;
+     size_t brac = 0;
+     while (1) {
+ 	char *curp = cur->m;
+-	size_t i, byte = fread(curp, 1, sizeof(cell), file);
++	size_t i, byte = my_read(file, curp, sizeof(cell));
+ 	for (i = 0; i < byte; i++)
+ 	    switch (curp[i]) {
+ 	    case '(':
+@@ -160,7 +164,7 @@
+ 	}
+ 	cur++;
+     }
+-    fclose(file);
++    my_close(file);
+     if (0 < brac)
+ 	return 2;
+     cell_allocator_init(cur + 1, &ram[RAM_SIZE], NULL);
+@@ -173,13 +177,20 @@
+     *sip_p = sip;
+     return 0;
+ }
++static void print_error(const char *msg)
++{
++    size_t msg_len;
++    for (msg_len = 0; '\0' != msg[msg_len]; msg_len++);
++    my_write(my_stderr, msg, msg_len);
++}
+ int main(int argc, char **argv)
+ {
+     //const char romsrc[] = ")";
+     const char *ramsrc;
+     int rst;
+     if (2 != argc) {
+-	fprintf(stderr, "%s [source file]\n", argv[0]);
++	print_error(argv[0]);
++	print_error(" [source file]\n");
+ 	return 1;
+     }
+     rst = place_source(argv[1], &ramsrc);

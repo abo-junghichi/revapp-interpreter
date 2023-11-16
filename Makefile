@@ -1,7 +1,7 @@
 CC=gcc -Wall -Wextra -Wstrict-aliasing=1 -pedantic
 BUILDCC=$(CC) -O
-HOSTCC=$(CC) -O3 -DNDEBUG
-#HOSTCC=$(CC) -g -DALLOC_TRACE
+HOSTCC=$(CC) -O3 -DNDEBUG -DSHEBANG
+#HOSTCC=$(CC) -g -DALLOC_TRACE -DSHEBANG
 
 clean:
 	rm *.out *.o romsrc.c

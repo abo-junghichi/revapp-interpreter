@@ -132,8 +132,58 @@ static const prim_env_member primitives[] = {
     PRIMITIVE(getc),
     PRIMITIVE_END
 };
+#define RAM_SIZE 100000
+static cell ram[RAM_SIZE];
+static int place_source(const char *path, const char **sip_p)
+{
+    cell *cur = ram;
+    FILE *file = fopen(path, "r");
+    char *sip = ram[0].m;
+    size_t brac = 0;
+    while (1) {
+	char *curp = cur->m;
+	size_t i, byte = fread(curp, 1, sizeof(cell), file);
+	for (i = 0; i < byte; i++)
+	    switch (curp[i]) {
+	    case '(':
+		brac++;
+		break;
+	    case ')':
+		if (0 >= brac)
+		    return 1;
+		brac--;
+		break;
+	    }
+	if (sizeof(cell) > byte) {
+	    curp[byte] = ')';
+	    break;
+	}
+	cur++;
+    }
+    fclose(file);
+    if (0 < brac)
+	return 2;
+    cell_allocator_init(cur + 1, &ram[RAM_SIZE], NULL);
+#ifdef SHEBANG
+    if ('#' == sip[0] && '!' == sip[1]) {
+	sip += 2;
+	while ('\n' != *(sip++));
+    }
+#endif				/* SHEBANG */
+    *sip_p = sip;
+    return 0;
+}
 int main(int argc, char **argv)
 {
     //const char romsrc[] = ")";
-    return main_core(primitives, romsrc, argc, argv);
+    const char *ramsrc;
+    int rst;
+    if (2 != argc) {
+	fprintf(stderr, "%s [source file]\n", argv[0]);
+	return 1;
+    }
+    rst = place_source(argv[1], &ramsrc);
+    if (rst)
+	return rst + 1;
+    return revapp_interp(primitives, romsrc, ramsrc);
 }

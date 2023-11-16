@@ -1,3 +1,5 @@
+#ifndef REVAPPI_H
+#define REVAPPI_H
 #include <stddef.h>
 #define PRIM_REGFILE_SIZE 10
 typedef struct thunk thunk;
@@ -65,6 +67,8 @@ union cell {
     CELL_CONT;
     char m[CELL_SIZE];
 };
+void cell_allocator_init(cell * start, cell * end,
+			 cell * (*runout) (void));
 cell *cell_alloc(void);
 void cell_free(void *);
 #define PIP_POP(thunk_type_stem) {&thunk_##thunk_type_stem,NULL}
@@ -81,5 +85,6 @@ typedef struct {
 } prim_env_member;
 #define PRIMITIVE(name) { #name "=", prim_##name }
 #define PRIMITIVE_END { NULL, NULL }
-int main_core(const prim_env_member * membs, const char *romsrc, int argc,
-	      char **argv);
+int revapp_interp(const prim_env_member * membs, const char *romsrc,
+		  const char *ramsrc);
+#endif				/* REVAPPI_H */

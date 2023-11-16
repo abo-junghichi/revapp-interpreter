@@ -1,18 +1,25 @@
 #include <assert.h>
+#ifdef ALLOC_TRACE
 #include <stdio.h>
+#endif
 #include "revappi.h"
-#define RAM_SIZE 100000
-#define PRIM_REGFILE_SIZE 10
-static cell ram[RAM_SIZE];
-static cell *free_cell = NULL, *cell_for_chunk, *cell_used =
-    &ram[RAM_SIZE];
+static cell *free_cell =
+    NULL, *cell_spare, *cell_limit, *(*cell_runout)(void);
+void cell_allocator_init(cell *start, cell *end, cell *(*runout) (void))
+{
+    cell_spare = start;
+    cell_limit = end;
+    cell_runout = runout;
+}
 cell *cell_alloc(void)
 {
     cell *rtn = free_cell;
     if (rtn)
 	free_cell = rtn->free;
-    else if (cell_for_chunk < cell_used)
-	rtn = --cell_used;
+    else if (cell_limit > cell_spare)
+	rtn = cell_spare++;
+    else
+	rtn = cell_runout();
 #ifdef ALLOC_TRACE
     fprintf(stderr, "@ a.out + %p 0x%x\n", (void *) rtn, sizeof(cell));
 #endif
@@ -370,45 +377,6 @@ static beta_rst beta_prim(force_regfile *r)
     list_release(tmp);
     return beta_force;
 }
-static int place_source(const char *path, char **sip_p)
-{
-    cell *cur = ram;
-    FILE *file = fopen(path, "r");
-    char *sip = ram[0].m;
-    size_t brac = 0;
-    while (1) {
-	char *curp = cur->m;
-	size_t i, byte = fread(curp, 1, sizeof(cell), file);
-	for (i = 0; i < byte; i++)
-	    switch (curp[i]) {
-	    case '(':
-		brac++;
-		break;
-	    case ')':
-		if (0 >= brac)
-		    return 1;
-		brac--;
-		break;
-	    }
-	if (sizeof(cell) > byte) {
-	    curp[byte] = ')';
-	    break;
-	}
-	cur++;
-    }
-    fclose(file);
-    if (0 < brac)
-	return 2;
-    cell_for_chunk = cur + 1;
-#ifdef SHEBANG
-    if ('#' == sip[0] && '!' == sip[1]) {
-	sip += 2;
-	while ('\n' != *(sip++));
-    }
-#endif				/* SHEBANG */
-    *sip_p = sip;
-    return 0;
-}
 void thunk_nop_retain(thunk_cont c)
 {
     /* return; */
@@ -433,27 +401,19 @@ static list *gen_prim_env(const prim_env_member *membs)
     }
     return rtn;
 }
-int main_core(const prim_env_member *membs, const char *romsrc, int argc,
-	      char **argv)
+int revapp_interp(const prim_env_member *membs, const char *romsrc,
+		  const char *ramsrc)
 {
     exec_src_rst rst;
-    char *src;
     thunk top, *thp;
     force_regfile r;
     list *stack = NULL;
-    if (2 != argc) {
-	fprintf(stderr, "%s [source file]\n", argv[0]);
-	return 1;
-    }
-    rst = place_source(argv[1], &src);
-    if (rst)
-	return rst + 1;
     top.tht = &thunk_src;
     top.c.src.env = gen_prim_env(membs);
     top.c.src.sip = romsrc;
     rst = exec_src(&stack, &top.c.src.env, &top.c.src.sip);
     assert(exec_src_nop == rst && NULL == stack);
-    top.c.src.sip = src;
+    top.c.src.sip = ramsrc;
     thp = force(&r, &top);
     return !(&top == thp && NULL == top.c.force.thp
 	     && NULL == top.c.force.stack && NULL == r.stack

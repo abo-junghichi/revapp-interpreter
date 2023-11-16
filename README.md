@@ -29,7 +29,7 @@ nostdlibディレクトリでバイナリを構築します。
 	$ sh build-dirty.sh
 	$ cd ..
 	$ du -b nostdlib/revappi.out.trunc
-	8668 nostdlib/revappi.out.trunc
+	8748 nostdlib/revappi.out.trunc
 
 使い方は通常版と同じです。
 
@@ -45,7 +45,7 @@ nostdlibディレクトリでバイナリを構築します。
 	$ sh build-dirty.sh
 	$ cd ..
 	$ do -b nostdlib/revappi.out.trunc
-	3945 nostdlib/revappi.out.trunc
+	4025 nostdlib/revappi.out.trunc
 
 使うときは、組み込みrevappソースコードを先に読み込ませる必要があります。
 
