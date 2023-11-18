@@ -1,0 +1,30 @@
+--- main.c	2023-11-18 21:42:37.942943877 +0900
++++ countchunk.c	2023-11-18 22:08:01.762956460 +0900
+@@ -1,4 +1,5 @@
+ #include <stdio.h>
++#include <stdlib.h>
+ #include "revappi.h"
+ #include "romsrc.c"
+ static const thunk_type thunk_int =
+@@ -148,6 +149,12 @@
+     PRIMITIVE(getc),
+     PRIMITIVE_END
+ };
++static cell *runout(void)
++{
++    static size_t count = 0;
++    fprintf(stderr, "%u\n", ++count);
++    return malloc(sizeof(cell));
++}
+ #define RAM_SIZE 100000
+ static cell ram[RAM_SIZE];
+ static int place_source(const char *path, const char **sip_p)
+@@ -179,7 +186,7 @@
+     fclose(file);
+     if (0 < brac)
+ 	return 2;
+-    cell_allocator_init(cur + 1, &ram[RAM_SIZE], NULL);
++    cell_allocator_init(NULL, NULL, runout);
+ #ifdef SHEBANG
+     if ('#' == sip[0] && '!' == sip[1]) {
+ 	sip += 2;

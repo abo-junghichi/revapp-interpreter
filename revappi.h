@@ -3,9 +3,10 @@
 #include <stddef.h>
 #define PRIM_REGFILE_SIZE 10
 typedef struct thunk thunk;
+#define WORD_SIZE sizeof(thunk *)
 typedef union {
     thunk *thp;
-    int i;
+    char m[WORD_SIZE];
 } word;
 typedef struct {
     /*

@@ -4,10 +4,26 @@
 static const thunk_type thunk_int =
     { beta_undefined, thunk_nop_retain, thunk_nop_release };
 static const thunk_type *const dist_int[] = { &thunk_int, NULL };
+typedef union {
+    word w;
+    int i;
+} word_converter;
+static int word_to_int(word w)
+{
+    word_converter u;
+    u.w = w;
+    return u.i;
+}
+static word int_to_word(int i)
+{
+    word_converter u;
+    u.i = i;
+    return u.w;
+}
 #define BINARYOPINT(OP,name) \
 static size_t beta_prim_##name(word *r)\
 {\
-    r[0].i = r[0].i OP r[1].i;\
+    r[0] = int_to_word(word_to_int(r[0]) OP word_to_int(r[1]));\
     r[1].thp = r[2].thp;\
     return 0;\
 }\
@@ -23,13 +39,13 @@ static const thunk_type *const dist_intint[] =
 static const thunk_type *const dist_thunk[] = { NULL };
 static size_t beta_prim_divmod(word *r)
 {
-    int act = r[1].i, pas = r[0].i;
+    int act = word_to_int(r[1]), pas = word_to_int(r[0]);
     if (0 == act) {
 	r[0].thp = r[3].thp;
 	return 1;
     } else {
-	r[1].i = pas / act;
-	r[0].i = pas % act;
+	r[1] = int_to_word(pas / act);
+	r[0] = int_to_word(pas % act);
 	return 0;
     }
 }
@@ -40,7 +56,7 @@ static const prim_src prim_divmod[] = {
 static size_t beta_primcore_const_int(int i, word *r)
 {
     r[1].thp = r[0].thp;
-    r[0].i = i;
+    r[0] = int_to_word(i);
     return 0;
 }
 #define CONSTINT(value,name) \
@@ -56,7 +72,7 @@ CONSTINT(EOF, eof);
 #define COMPAREINT(OP,name) \
 static size_t beta_prim_##name(word *r)\
 {\
-    r[0].thp = r[r[0].i OP r[1].i ? 3 : 2].thp;\
+    r[0].thp = r[word_to_int(r[0]) OP word_to_int(r[1]) ? 3 : 2].thp;\
     return 0;\
 }\
 static const prim_src prim_##name[] = {\
@@ -95,7 +111,7 @@ static const prim_src prim_joinworld[] = {
 };
 static size_t beta_primcore_putc(FILE *f, word *r)
 {
-    fputc(r[1].i, f);
+    fputc(word_to_int(r[1]), f);
     r[1].thp = r[2].thp;
     return 0;
 }
@@ -113,7 +129,7 @@ PUTC_CORE(stderr, errc);
 static size_t beta_prim_getc(word *r)
 {
     r[2].thp = r[1].thp;
-    r[1].i = fgetc(stdin);
+    r[1] = int_to_word(fgetc(stdin));
     return 0;
 }
 static const thunk_type *const dist_getc[] =
