@@ -15,7 +15,7 @@ img2c.out: img2c.c
 romsrc.c: img2c.out romsrc/romsrc.revapp
 	./img2c.out < romsrc/romsrc.revapp > romsrc.c
 revappi.o: revappi.h revappi.c
-	$(HOSTCC) -c revappi.c -DSHEBANG
+	$(HOSTCC) -c revappi.c
 main.o: revappi.h romsrc.c main.c
 	$(HOSTCC) -c main.c
 revappi.out: revappi.o main.o
