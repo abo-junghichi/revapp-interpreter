@@ -1,6 +1,6 @@
 #!./revappi.out
 
 ((=self =w (=c =w
-   ((w c putc)=w w self) w
+   (self w c putc) w
    c eof equal) w getc) fix
 ) main

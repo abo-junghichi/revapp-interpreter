@@ -28,11 +28,19 @@
 (=world
  ((=w1 =w2 =r (w2 cover) (w1 cover) r) forkworld) world
 )=forkworld
-(joinworld binaryopint)=joinworld
+(joinworld binaryopint
+ =world1 =world2
+ (((=world_bare
+    =next (world_bare cover) next
+   ) joinworld) world1) world2
+)=joinworld
 (=main
  (=endworld_bare endworld_bare) startworld main
 )=main
-(=putc =c =world ((cover putc) c) world)=putc_cover
+(=putc =c =world
+ (((=bare
+    =next (bare cover) next) putc) c) world
+)=putc_cover
 (putc putc_cover)=putc
 (errc putc_cover)=errc
 (=world

@@ -1,6 +1,5 @@
 (=string =w
- (w string putc string_output_core)=w
- w '\n' putc
+ ('\n' putc) w string putc string_output_core
 )=print
 
 ((([ 1 , 0 , 0 ]) decimal)=max
@@ -13,6 +12,6 @@
    (([ 'f' , 'i' , 'z' , 'z' ])
     ([ 'f' , 'i' , 'z' , 'z' , '\s' , 'b' , 'u' , 'z' , 'z' ])
     b) 3 core)=rst
-  ((world rst print) count self)
-  world count max big (=) world) fix
+  ((count self) world rst print)
+  world count max big) fix
 ) main

@@ -10,7 +10,9 @@
 
 (=c (=) startworld c errc)=checkpoint
 
-((=self =list =world (=h =t (world h) t self) world list) fix)=iosystem_outseq
+((=self =list =world
+  (=h =t (t self) world h)
+  (=r world r) list) fix)=iosystem_outseq
 
 (=putc =string (string putc list_map) iosystem_outseq)=string_output_core
 
@@ -54,9 +56,9 @@
 )=read_unum
 
 (=num
- (=) (startworld
-  (num num2str) errc string_output_core
- ) '\n' errc (=) num
+ (=) ('\n' errc)
+ startworld (num num2str) errc string_output_core
+ (=) num
 )=checkpoint
 
 #endif /* IOSYSTEM_REVAPP */

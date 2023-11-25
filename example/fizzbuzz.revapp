@@ -28,13 +28,13 @@
 )=fizzbuzz
 
 (=string =w
- (w string putc string_output_core)=w
- w '\n' putc
+ ('\n' putc)
+ w string putc string_output_core
 )=print
 
 ((fizzbuzz cdr) (=self =fl =world
   (=h =t
-   (world h print) t self
-  ) fl (=) world
+   (t self) world h print
+  ) fl
  ) fix
 ) main
