@@ -29,7 +29,7 @@ nostdlibディレクトリでバイナリを構築します。
 	$ sh build-dirty.sh
 	$ cd ..
 	$ du -b nostdlib/revappi.out.trunc
-	8888 nostdlib/revappi.out.trunc
+	8865 nostdlib/revappi.out.trunc
 
 使い方は通常版と同じです。
 

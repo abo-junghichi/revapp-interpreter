@@ -28,8 +28,7 @@
 (=world
  ((=w1 =w2 =r (w2 cover) (w1 cover) r) forkworld) world
 )=forkworld
-(joinworld binaryopint
- =world1 =world2
+(=world1 =world2
  (((=world_bare
     =next (world_bare cover) next
    ) joinworld) world1) world2
