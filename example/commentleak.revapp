@@ -1,0 +1,18 @@
+(=string =w
+ (w string putc string_output_core)=w
+ w '\n' putc
+)=print
+
+(zero (=self =num ((num one plus) self) num cons) fix)=num_list
+
+(num_list (=self =list =w
+  (undermentioned word seems to be in a comment.
+   but actually works as a dummy link to cause space-leak.
+
+   num_list
+
+  )=
+  (=num =list
+   (w (num num2str) print)=w
+   w list self (=) w) undefined list) fix
+) main
