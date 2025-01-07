@@ -6,7 +6,7 @@ static int syscall1(int syscall, int arg1)
 {
     int ret;
     __asm__ volatile (Syscall_core:"=a"(ret):"a"(syscall),
-                      "b"(arg1):"memory");
+		      "b"(arg1):"memory");
     return ret;
 }
 static int syscall2(int syscall, int arg1, int arg2)
@@ -16,7 +16,6 @@ static int syscall2(int syscall, int arg1, int arg2)
 		      "c"(arg2):"memory");
     return ret;
 }
-
 static int syscall3(int syscall, int arg1, int arg2, int arg3)
 {
     int ret;
@@ -28,7 +27,7 @@ size_t my_read(int fd, void *buf, size_t count)
 {
     char *buf_start = buf, *buf_done = buf;
     while (0 < count) {
-	int rst = syscall3(SYS_read, fd, buf_done, count);
+	int rst = syscall3(SYS_read, fd, (int) buf_done, count);
 	if (0 >= rst)
 	    break;
 	buf_done += rst;
@@ -38,31 +37,27 @@ size_t my_read(int fd, void *buf, size_t count)
 }
 void my_write(int fd, const void *buf, size_t count)
 {
-    syscall3(SYS_write, fd, buf, count);
+    syscall3(SYS_write, fd, (int) buf, count);
 }
-
 void my_exit(int status)
 {
- syscall1(__NR_exit, status);
+    syscall1(__NR_exit, status);
 }
- int my_open(const char *pathname)
+int my_open(const char *pathname)
 {
- 
- int flags = 0;
-    return syscall2(__NR_open, pathname, flags);
+    int flags = 0;
+    return syscall2(__NR_open, (int) pathname, flags);
 }
-
- int my_close(int fd)
+int my_close(int fd)
 {
     return syscall1(__NR_close, fd);
 }
-
 extern int main(int argc, char **argv);
 void _start_main(char **ebp)
 {
     int argc;
     char **argv;
-    argc = ebp[0];
+    argc = (int) ebp[0];
     argv = ebp + 1;
     my_exit(main(argc, argv));
 }
