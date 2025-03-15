@@ -17,7 +17,14 @@ GNU C コンパイラがセットアップ済みのUnix環境での場合
 
 	$ ./example/cat.revapp < Makefile
 
-### 静的リンクのLinux-i386用極小バイナリ
+### 静的リンクのLinux用極小バイナリ
+OSのシステムコールを直接使用することで
+C言語ランタイムライブラリを省くことができます。
+更に、読み込み専用データ領域用ページをコード領域ページに統合することで、
+異なる種類のページ境界に配置されるパディングを省くことができます。
+これらによって、バイナリサイズを大きく減らすことができます。
+現在、OSはLinuxのみ、命令セットはi386とamd64(x86_64)向けのものを構築可能です。
+
 バイナリ構築の前に、
 組み込みrevappソースコードをC言語処理系から扱える形に変換します。
 
@@ -26,7 +33,7 @@ GNU C コンパイラがセットアップ済みのUnix環境での場合
 nostdlibディレクトリでバイナリを構築します。
 
 	$ cd nostdlib
-	$ sh build.sh i386
+	$ sh build.sh i386 # if you want a binary for amd64, replace "i386" to "amd64".
 	$ cd ..
 	$ du -b nostdlib/revappi.out.trunc
 	8865 nostdlib/revappi.out.trunc
@@ -37,7 +44,7 @@ nostdlibディレクトリでバイナリを構築します。
 	$ ./revappi.out example/fizzbuzz100.revapp
 	$ ./example/cat.revapp < Makefile
 
-組み込みrevappソースコードを削除することで、バイナリサイズを減らせます。
+組み込みrevappソースコードを削除することで、バイナリサイズを更に減らせます。
 
 	$ make img2c.out
 	$ printf "" | ./img2c.out > romsrc.c
