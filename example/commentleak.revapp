@@ -1,6 +1,5 @@
 (=string =w
- (w string putc string_output_core)=w
- w '\n' putc
+ ('\n' putc) w string putc string_output_core
 )=print
 
 (zero (=self =num ((num one plus) self) num cons) fix)=num_list
@@ -13,6 +12,5 @@
 
   )=
   (=num =list
-   (w (num num2str) print)=w
-   w list self (=) w) undefined list) fix
+   (list self) w (num num2str) print) undefined list) fix
 ) main

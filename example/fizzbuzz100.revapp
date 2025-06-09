@@ -13,5 +13,5 @@
     ([ 'f' , 'i' , 'z' , 'z' , '\s' , 'b' , 'u' , 'z' , 'z' ])
     b) 3 core)=rst
   ((count self) world rst print)
-  world count max big) fix
+  (=r world r) count max big) fix
 ) main

@@ -1,0 +1,4 @@
+(=w
+ (=w =d (=w =r w r) (w 'a' putc) (d 'b' putc) joinworld)
+ w forkworld
+) main

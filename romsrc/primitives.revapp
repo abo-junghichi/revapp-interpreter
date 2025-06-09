@@ -25,27 +25,22 @@
    (=fail =succ fail) divmod) act) pas
 )=divmod
 (cover startworld)=startworld
-(=world
- ((=w1 =w2 =r (w2 cover) (w1 cover) r) forkworld) world
+((=world)=
+ (=w1 =w2 =next w2 w1 next) forkworld
 )=forkworld
-(=world1 =world2
- (((=world_bare
-    =next (world_bare cover) next
-   ) joinworld) world1) world2
-)=joinworld
+(joinworld binaryopint)=joinworld
 (=main
- (=endworld_bare endworld_bare) startworld main
+ (=endworld endworld) main startworld
 )=main
-(=putc =c =world
- (((=bare
-    =next (bare cover) next) putc) c) world
+(=putc =c (=world)=
+ ((=world
+   =next world next) putc) c
 )=putc_cover
 (putc putc_cover)=putc
 (errc putc_cover)=errc
-(=world
- ((=bare =world
-   =next (world cover) (bare cover) next
-  ) getc) world
+((=world)=
+ (=bare =world
+  =next world (bare cover) next) getc
 )=getc
 (cover eof)=eof
 
