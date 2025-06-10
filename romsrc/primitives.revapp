@@ -24,7 +24,6 @@
     =fail =succ (mod cover) (div cover) succ)
    (=fail =succ fail) divmod) act) pas
 )=divmod
-(cover startworld)=startworld
 ((=world)=
  (=w1 =w2 =next w2 w1 next) forkworld
 )=forkworld
