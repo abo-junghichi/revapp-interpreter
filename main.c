@@ -150,55 +150,57 @@ static const prim_env_member primitives[] = {
 };
 #define RAM_SIZE 100000
 static cell ram[RAM_SIZE];
-static int place_source(const char *path, const char **sip_p)
+static int place_source(const char *path)
 {
-    cell *cur = ram;
     FILE *file = fopen(path, "r");
     char *sip = ram[0].m;
     size_t brac = 0;
+    int linehead = 1;
     while (1) {
-	char *curp = cur->m;
-	size_t i, byte = fread(curp, 1, sizeof(cell), file);
-	for (i = 0; i < byte; i++)
-	    switch (curp[i]) {
-	    case '(':
-		brac++;
-		break;
-	    case ')':
-		if (0 >= brac)
-		    return 1;
-		brac--;
-		break;
-	    }
-	if (sizeof(cell) > byte) {
-	    curp[byte] = ')';
+	if (1 != fread(sip, 1, 1, file))
+	    goto end_of_file;
+	switch (*sip) {
+	case '(':
+	    brac++;
 	    break;
+	case ')':
+	    if (0 >= brac)
+		return 1;
+	    brac--;
+	    break;
+	case '#':
+	    if (0 == linehead)
+		goto skip_clear_linehead;
+	    while ('\n' != *sip)
+		if (1 != fread(sip, 1, 1, file))
+		    goto end_of_file;
+	case '\n':
+	    linehead = 1;
+	    goto skip_clear_linehead;
 	}
-	cur++;
+	linehead = 0;
+      skip_clear_linehead:
+	sip++;
     }
+  end_of_file:
+    *sip++ = ')';
     fclose(file);
     if (0 < brac)
 	return 2;
-    cell_allocator_init(cur + 1, &ram[RAM_SIZE], NULL);
-#ifdef SHEBANG
-    if ('#' == sip[0] && '!' == sip[1]) {
-	sip += 2;
-	while ('\n' != *(sip++));
-    }
-#endif				/* SHEBANG */
-    *sip_p = sip;
+    cell_allocator_init((cell *) ((((size_t) sip) + sizeof(cell) - 1) &
+				  -sizeof(cell)), &ram[RAM_SIZE], NULL);
     return 0;
 }
 int main(int argc, char **argv)
 {
     //const char romsrc[] = ")";
-    const char *ramsrc;
+    const char *ramsrc = ram[0].m;
     int rst;
     if (2 != argc) {
 	fprintf(stderr, "%s [source file]\n", argv[0]);
 	return 1;
     }
-    rst = place_source(argv[1], &ramsrc);
+    rst = place_source(argv[1]);
     if (rst)
 	return rst + 1;
     return revapp_interp(primitives, romsrc, ramsrc);
