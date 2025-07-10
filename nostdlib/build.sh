@@ -6,7 +6,7 @@ for f in system-$ARCH revappi main
 do
 	gcc -Os -Wall -pedantic -Wextra -Wstrict-aliasing=1 \
 		-static -nostdlib -fno-builtin -fno-pie -S \
-		-DSHEBANG $f.c -o $f-raw.s
+		$f.c -o $f-raw.s
 	sed 's/.rodata/.text/g' <$f-raw.s >$f.s
 done
 sh elfheader-$ARCH.sh 0 0 0 0 > elfheader.s

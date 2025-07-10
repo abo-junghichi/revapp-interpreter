@@ -1,5 +1,5 @@
---- main.c	2023-11-18 21:42:37.942943877 +0900
-+++ countchunk.c	2023-11-18 22:08:01.762956460 +0900
+--- main.c.org	2025-07-11 00:43:36.964606686 +0900
++++ main.c	2025-07-11 00:45:32.232191578 +0900
 @@ -1,4 +1,5 @@
  #include <stdio.h>
 +#include <stdlib.h>
@@ -18,13 +18,14 @@
 +}
  #define RAM_SIZE 100000
  static cell ram[RAM_SIZE];
- static int place_source(const char *path, const char **sip_p)
-@@ -179,7 +186,7 @@
+ static int place_source(const char *path)
+@@ -187,8 +194,7 @@
      fclose(file);
      if (0 < brac)
  	return 2;
--    cell_allocator_init(cur + 1, &ram[RAM_SIZE], NULL);
+-    cell_allocator_init((cell *) ((((size_t) sip) + sizeof(cell) - 1) &
+-				  -sizeof(cell)), &ram[RAM_SIZE], NULL);
 +    cell_allocator_init(NULL, NULL, runout);
- #ifdef SHEBANG
-     if ('#' == sip[0] && '!' == sip[1]) {
- 	sip += 2;
+     return 0;
+ }
+ int main(int argc, char **argv)
