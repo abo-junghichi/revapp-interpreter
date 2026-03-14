@@ -8,7 +8,7 @@
 
 (-- io system --)=
 
-(=c (=) startworld c errc)=checkpoint
+(=c (=) (c errc) startworld)=checkpoint
 
 ((=self =list =world
   (=h =t (t self) world h)
@@ -53,9 +53,7 @@
 )=read_unum
 
 (=num
- (=) ('\n' errc)
- startworld (num num2str) errc string_output_core
- (=) num
+ (=) ('\n' errc) ((num num2str) errc string_output_core) startworld
 )=checkpoint
 
 #endif /* IOSYSTEM_REVAPP */
