@@ -46,13 +46,10 @@
 
 (zero (=self =num =world (=c =world
    (=rtn world num rtn)=return
-   ((c '0' minus)=c
-    (world ((num 10 mul) c plus) self)=core
-    (return core c zero eqbig)
-    return c 10 eqbig
-   ) return c isspace
-  ) world getc
- ) fix
+   (c '0' minus)=c
+   (world ((num 10 mul) c plus) self)=core
+   (return core c zero eqbig) return c 10 eqbig
+  ) world getc) fix
 )=read_unum
 
 (=num
