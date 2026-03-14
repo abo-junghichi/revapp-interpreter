@@ -1,0 +1,7 @@
+(putc string_output_core)=printstr
+(=w ((=self =num =w
+   ((=w ((((num 3 mul) 1 plus) ((=div = div) undefined num 2 divmod)
+       ((=) undefined num 2 divmod) 0 equal) self) w ',' putc)
+    ('\n' putc) one num eqbig)
+   w (num num2str) printstr
+  ) fix) w read_unum) main
