@@ -29,7 +29,7 @@
 )=forkworld
 (joinworld binaryopint)=joinworld
 (=main
- (=endworld endworld) main startworld
+ ((=endworld)=) main startworld
 )=main
 (=putc =c (=world)=
  ((=world
