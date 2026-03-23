@@ -59,6 +59,46 @@ nostdlibディレクトリでバイナリを構築します。
 	$ make romsrc/romsrc.revapp
 	$ cat romsrc/romsrc.revapp example/fizzbuzz100.revapp | ./nostdlib/revappi.out.trunc /dev/stdin
 
+### バイトコード処理系
+revappソースコードをバイトコードにコンパイルしてから実行することで、
+実行速度を上げてRAMの消費量を減らた、もはや最低限とは言えない処理系です。
+現在、バイトコードにインタプリタを付加してコンパイルした、
+実行ファイルの生成のみを実装しています。
+また、最適化機能を追加しているので、
+空文字列への束縛「=」を用いた表記でメモリリークが生じず、
+コメント文として安全に使えます。
+
+	(this can be used safely as a comment!)=
+
+代わりに、shebang行も兼ねて最低限の処理系では実装していた、
+文字'#'で始まる行をコメント文として扱う機能はありません。
+
+bytecodeディレクトリで、バイトコードコンパイラを構築します。
+
+	$ cd bytecode
+	$ sh bootstrap.sh
+
+構築したバイトコードコンパイラにrevappソースコードを読み込ませると、
+バイトコードを格納したC言語ソースコードが生成されます。
+
+	$ echo '(a b)' | ./comp.out
+	static const unsigned char bytecode_application[]={
+	0xb1,0xb0,0x02,0xdd,0x80,0x81,0x00,0x02
+	};
+	static const word embed_application[]={
+	{(intptr_t)&thunk_src_const},{(intptr_t)bytecode_application+3},{(intptr_t)embed_b},{(intptr_t)embed_a},{(intptr_t)NULL}
+	
+	};
+
+バイトコードインタプリタ用の組み込みrevappコードと
+アプリケーションのrevappコードをバイトコードコンパイラに読み込ませ、
+生成されたC言語コードを用いて、バイトコードインタプリタを再コンパイルします。
+
+	$ cat romsrc/romsrc.revapp ../example/collatz.revapp | ./comp.out > application.c
+	$ gcc main.c -o collatz.out
+	$ echo 9 | ./collatz.out
+	9,28,14,7,22,11,34,17,52,26,13,40,20,10,5,16,8,4,2,1
+
 ## 文法
 revappの文法をBNF記法で表すと、De Bruijn notationとよく似たものになります。
 
