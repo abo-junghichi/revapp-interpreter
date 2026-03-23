@@ -202,12 +202,11 @@
  ([ '\n' , '}' , ';' , '\n' ])=str_close
  ([ 'e' , 'm' , 'b' , 'e' , 'd' , '_' ])=str_embed
 
- (=close_char =print
+ (=print
   ([ (([ '{' , 'brac' , 'i' , 'n' , 't' , 'p' , 't' , 'r'
      , '_' , 't' , 'cket' ]) printstr)
-   , print , (([ '}' , close_char ]) printstr)
-   ]) iosystem_outseq)=printword_core
- (',' printword_core)=printword
+   , print , ('}' putc) ]) iosystem_outseq)=printword_core
+ (=print =w (',' putc) w print printword_core)=printword
 
  world
  ([ (str_sc printstr)
@@ -235,7 +234,7 @@
   , (embed_list cover (=prim =t =w
     (((prim str_embed list_append) printstr)
      printword) w t) list_fold)
-  , ((([ 'N' , 'U' , 'L' , 'L' ]) printstr) '\n' printword_core)
+  , ((([ 'N' , 'U' , 'L' , 'L' ]) printstr) printword_core)
   , (str_close printstr) ]) iosystem_outseq
 )=to_clang
 

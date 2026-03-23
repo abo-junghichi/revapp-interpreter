@@ -87,7 +87,6 @@ bytecodeディレクトリで、バイトコードコンパイラを構築します。
 	};
 	static const word embed_application[]={
 	{(intptr_t)&thunk_src_const},{(intptr_t)bytecode_application+3},{(intptr_t)embed_b},{(intptr_t)embed_a},{(intptr_t)NULL}
-	
 	};
 
 バイトコードインタプリタ用の組み込みrevappコードと
