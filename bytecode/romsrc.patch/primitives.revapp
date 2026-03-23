@@ -1,0 +1,54 @@
+#ifndef PRIMITIVES_REVAPP
+#define PRIMITIVES_REVAPP
+
+(-- primitives --)=
+(=v =f v f)=cover
+(=t =f t)=true
+(=t =f f)=false
+(=compar =std =tgt
+ false true (compar std) tgt
+)=compareint
+(equal compareint)=equal
+(big compareint)=big
+(eqbig compareint)=eqbig
+(=ope =act =pas
+ cover (ope act) pas
+)=binaryopint
+(plus binaryopint)=plus
+(minus binaryopint)=minus
+(mul binaryopint)=mul
+(and binaryopint)=and
+(or binaryopint)=or
+(xor binaryopint)=xor
+(shr binaryopint)=shr
+(shl binaryopint)=shl
+(zero)=
+(one)=
+(=act =pas
+ (=div =mod
+  =fail =succ (mod cover) (div cover) succ)
+ (=fail =succ fail) (divmod act) pas
+)=divmod
+(=world
+ (=w1 =w2 =next w2 w1 next) world forkworld
+)=forkworld
+(joinworld binaryopint)=joinworld
+(=main
+ ((=endworld)=) main startworld
+)=main
+(=putc =c =world
+ (=world
+  =next world next) world putc c
+)=putc_cover
+(putc putc_cover)=putc
+(errc putc_cover)=errc
+(=world
+ (=bare =world
+  =next world (bare cover) next) world getc
+)=getc
+(eof)=
+
+(-- for convenience --)=
+(=f (=s (s s) f)=s s s)=fix
+
+#endif /* PRIMITIVES_REVAPP */

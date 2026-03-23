@@ -1,0 +1,48 @@
+diff '--color=auto' -r -u srci.org/main.c srci/main.c
+--- srci.org/main.c	2026-01-29 03:55:16.018044678 +0900
++++ srci/main.c	2026-01-29 04:07:56.850882145 +0900
+@@ -34,6 +34,11 @@
+ BINARYOPINT(+, plus);
+ BINARYOPINT(-, minus);
+ BINARYOPINT(*, mul);
++BINARYOPINT(&, and);
++BINARYOPINT(|, or);
++BINARYOPINT(^, xor);
++BINARYOPINT(>>, shr);
++BINARYOPINT(<<, shl);
+ static const thunk_type *const dist_intint[] =
+     { &thunk_int, &thunk_int, NULL };
+ static const thunk_type *const dist_thunk[] = { NULL };
+@@ -138,6 +143,8 @@
+     { PIP_POP_THUNK, PIP_POP(world), PIP_CALL(getc), PIP_DIST(getc) };
+ static const prim_env_member primitives[] = {
+     PRIMITIVE(plus), PRIMITIVE(minus), PRIMITIVE(mul), PRIMITIVE(divmod),
++    PRIMITIVE(and), PRIMITIVE(or), PRIMITIVE(xor),
++    PRIMITIVE(shr), PRIMITIVE(shl),
+     PRIMITIVE(zero), PRIMITIVE(one), PRIMITIVE(eof),
+     PRIMITIVE(equal), PRIMITIVE(big), PRIMITIVE(eqbig),
+     PRIMITIVE(startworld), PRIMITIVE(forkworld), PRIMITIVE(joinworld),
+@@ -148,7 +155,7 @@
+     PRIMITIVE(getc),
+     PRIMITIVE_END
+ };
+-#define RAM_SIZE 100000
++#define RAM_SIZE 0xffffff
+ static cell ram[RAM_SIZE];
+ static int place_source(const char *path)
+ {
+diff '--color=auto' -r -u srci.org/romsrc/primitives.revapp srci/romsrc/primitives.revapp
+--- srci.org/romsrc/primitives.revapp	2026-01-29 03:55:16.018044678 +0900
++++ srci/romsrc/primitives.revapp	2026-01-29 03:59:45.471954272 +0900
+@@ -17,6 +17,11 @@
+ (plus binaryopint)=plus
+ (minus binaryopint)=minus
+ (mul binaryopint)=mul
++(and binaryopint)=and
++(or binaryopint)=or
++(xor binaryopint)=xor
++(shr binaryopint)=shr
++(shl binaryopint)=shl
+ (cover zero)=zero
+ (cover one)=one
+ (=act =pas

@@ -1,0 +1,316 @@
+((=self =std =tgt
+  (=sc =std (=tc =tgt
+    false (tgt std self) tc sc equal
+   ) false tgt) ((= = false) true tgt) std) fix
+)=strcmp
+
+(((=name (=self =fvar_list
+    (=fvar =t
+     ((=rm =n =f (rm fvar cons) f) (=n =f n) t self)
+     (=n =f t f) fvar name strcmp)
+    (=n =f n) fvar_list) fix)=find_env
+  =fvar_list (=rlist)=
+  (fvar_list list_length)=fvar_org_count
+  fvar_list nil zero (=self =bind_count =def_stack =fvar_list
+   =rlist
+   (=ref_list
+    (ref_list fvar_list (=name =fvar_list
+      fvar_list (=) (name cons) fvar_list name find_env)
+     list_fold)=fvar_added
+    (=is_def =def_stack
+     (fvar_list fvar_added is_def) def_stack bind_count self)=self
+    self (nil true self) def_stack)=ref_core
+   (=inst (=rlist)=
+    ((brac)= =child
+     ((= = = = (=fvar_list)=) child) ref_core)
+    ((ref)= =name ([ name ]) ref_core)
+    ((def)= =stem
+     ((=fvar_list_rm_stem)=
+      (def_stack true cons) (bind_count one plus) self)
+     (fvar_list (def_stack false cons) bind_count self)
+     fvar_list stem find_env) inst)
+   (((fvar_list list_length) bind_count plus)
+    fvar_org_count minus) rlist) fix
+ )=count_new_reg
+ ((=name =fvar_list =r
+   r (fvar_list r) (= undefined)
+   fvar_list (=self =fvar_list =n =f =c
+    (=fvar =tail
+     ((=tail (tail fvar cons) c) f (=len
+       (= = (len one plus) n) (len (tail name cons) c) fvar)
+      tail self) ((tail list_length) f) fvar name strcmp)
+    (zero n) fvar_list) fix)=allot
+  (=r inst_list child_list fvar_list r)=
+  =reg_new =fvar_list (=child_list =inst_list =rinst)=
+  (reg_new (=self =reg_new
+    fvar_list (((reg_new one minus) self) nil cons)
+    reg_new zero big) fix) nil
+  (=self =def_stack =fvar_list
+   =child_list =inst_list =rinst
+   (=inst (=rinst)=
+    (=push
+     (=h =t
+      (inst_list child_list fvar_list t self)
+      ((t self) push) h) ((nil self) push) def_stack
+    )=def_stack_next
+    ((brac)= =child (=self (=bsd = = = =ref_list
+       (=m_type
+        (=id_list =fvar_list
+         (inst_list (=z =p =m id_list m_type m) cons)
+         (child_list child cons) fvar_list self)
+        ref_list (=r fvar_list nil r)
+        (=name =t (=id_list =fvar_list (=fvar_list =reg_id
+           =r fvar_list (id_list reg_id cons) r
+          ) fvar_list name allot) t) list_fold)=src
+       ((= (=done)=) src) ((=yet = yet) src)
+       ((inst_list (=z =p =m (= = (=bracket)=) z) cons)
+        child_list fvar_list self) bsd) child) def_stack_next)
+    ((ref)= =name
+     (=self (=fvar_list =reg_id
+       (inst_list (=z =p =m reg_id (= = (=ref)=) p) cons)
+       child_list fvar_list self
+      ) fvar_list name allot) def_stack_next)
+    ((def)= =stem
+     ((do bind)= =reg_id =fvar_list
+      (inst_list (=z =p =m reg_id (= =def = def) p) cons)
+      child_list fvar_list (def_stack true cons) self)
+     ((cut)=
+      =rinst (= =
+       rinst inst_list child_list fvar_list
+       (def_stack false cons) self)
+      (=r (inst_list (=z =p =m (=cut = = cut) z) cons)
+       child_list fvar_list r) rinst)
+     (=cap =left =fvar_list
+      (=head =fvar_list
+       (fvar_list head left)
+       (=c =d (fvar_list cap) (fvar_list list_length) d)
+       (= = head stem strcmp) false stem)
+      (=c =d c) fvar_list)=core
+     fvar_list (=top (=self (=fvar_list)=
+       (=name =fvar_list
+        (=reg_id =fvar_list
+         =c =d (fvar_list name cons) reg_id d)
+        (=c =d c) fvar_list self)
+       (top cons) core) fix) () core) inst)
+   (=r inst_list child_list fvar_list r) rinst) fix
+ )=reg_allot
+ (((1 7 shl) 1 minus)=mask
+  =is_msb =gen_header (=arg =tail)=
+  1 (=self =next_bit =arg =tail
+   ((tail ((arg mask and) (next_bit 7 shl) or) cons)
+    (arg 7 shr) 0 self)
+   (tail (arg next_bit gen_header) cons) arg is_msb) fix
+ )=emit_shiftin_core
+ (=fvar_list =child_list =inst_list
+  (=bracket =src =src_done
+   (= = src) (=p_type = src src_done undefined p_type)
+   (=z_type src bracket src_done z_type)
+   (=h = h) undefined inst_list)=bsd
+  (=childs_code_len =childs_bytecode =child_entry_list
+   (=body_len =body_bytecode
+    =r fvar_list (body_bytecode childs_bytecode list_append)
+    body_len childs_code_len bsd r)
+   () zero child_entry_list inst_list (=self
+    =inst_list =child_entry_list =body_len =gen_code
+    (=inst =inst_list
+     (=child_entry_list =inst_code
+      (=tail (tail inst_code list_append) gen_code)
+      ((inst_code list_length) body_len plus)
+      child_entry_list inst_list self)=self_core
+     (child_entry_list self_core)=self
+     (=m_type =id_list (=chent =child_entry_list
+       ((([ 0 ]) id_list () (=id =t =inst
+          (inst id (=nbit (=arg)= (nbit 7 shl) or)
+           (=arg (1 7 shl) arg big) emit_shiftin_core) t)
+         list_fold)
+        (0 (chent body_len plus) minus)
+        (=nbit =arg
+         ((((7 6 m_type) 1 shl) nbit or) 4 shl)
+         (arg ((1 4 shl) 1 minus) and) or)
+        ((=arg)= (0 (1 4 shl) minus) eqbig) emit_shiftin_core)
+       child_entry_list self_core) undefined child_entry_list)
+     (=p_type =arg
+      (nil arg
+       (=nbit (=arg)=
+        (((5 4 3 p_type) 5 shl) (nbit 4 shl) or) or)
+       (=arg (1 4 shl) arg big) emit_shiftin_core) self)
+     (=z_type ([ (3 2 1 z_type) ]) self) inst)
+    (=r (nil gen_code) body_len r) inst_list) fix)
+  child_list (=self =child_list
+   (=child =child_list (= =child_len =body_len =ch_code =
+     (=len =code =ent_list
+      =r (ent_list (len body_len plus) cons)
+      (code ch_code list_append)
+      (len (body_len child_len plus) plus) r
+     ) child_list self) child)
+   (=r nil nil zero r) child_list) fix
+ )=emit
+ (=reg_new
+  () ((=z =p =m reg_new (=release = = release) p) cons)
+  reg_new zero big)=release_middle
+ (=r freevar_list bytecode body_len childs_len bsd r)=
+ =inst_rll
+ nil nil nil
+ inst_rll (= (=z =p =m (= =cket = cket) z) cons) (=self
+  =release =inst_rll
+  =fvar_list =child_list =inst_list
+  (=inst_rlist =inst_rll
+   (inst_rll release_middle self)
+   (inst_rlist fvar_list count_new_reg)=reg_new
+   inst_rlist (inst_list reg_new release)
+   child_list fvar_list reg_new reg_allot)
+  (inst_list child_list fvar_list emit) inst_rll) fix
+)=gen_code
+
+(=inst_rll
+ (inst_rll nil (=rlist =t
+   rlist (t 0 cons)
+   (=inst =t
+    (=child ((t 1 cons) ((= = = =bc = bc) child)
+      list_append) 9 cons)
+    (=name t 2 cons) (=stem t 4 cons) inst)
+   list_fold) list_fold
+ )=core
+ =r nil core 0 0 (=b =s (=d)=) r
+)=gen_code_fake
+
+(putc string_output_core)=printstr
+
+(('!' (=self =cur
+   (((=key =cont =r cont key r)=p
+     [ (([ '\\' , '\'' ]) '\'' p)
+     , (([ 'b' , 'r' , 'a' , 'c' ]) 'brac' p)
+     , (([ 'c' , 'k' , 'e' , 't' ]) 'cket' p)
+     , (([ 'e' , 'q' ]) 'eq' p)
+     , (([ '\\' , '\\' ]) '\\' p) ])=exception
+    (=cur
+     exception ([ cur ])
+     (=p =t (=key =cont t cont key cur equal) p) list_fold
+    )=ele
+    ((cur one plus) self) (cur ele) cons)
+   nil cur '~' big) fix)
+ ([ ([ '\\' , 't' ]) , ([ '\\' , 'n' ]) , ([ '\\' , 's' ]) ])
+ list_append
+)=env_letters_list
+
+(=name =entry =bytecode =embed_list =world
+ ([ 's' , 't' , 'a' , 't' , 'i' , 'c'
+  , '\s' , 'c' , 'o' , 'n' , 's' , 't' ])=str_sc
+ ([ 'b' , 'y' , 't' , 'e' , 'c' , 'o' , 'd' , 'e' , '_' ])=str_bc
+ (([ '[' , ']' , 'eq' , '{' , '\n' ])
+  name list_append)=str_open
+ ([ '\n' , '}' , ';' , '\n' ])=str_close
+ ([ 'e' , 'm' , 'b' , 'e' , 'd' , '_' ])=str_embed
+
+ (=close_char =print
+  ([ (([ '{' , 'brac' , 'i' , 'n' , 't' , 'p' , 't' , 'r'
+     , '_' , 't' , 'cket' ]) printstr)
+   , print , (([ '}' , close_char ]) printstr)
+   ]) iosystem_outseq)=printword_core
+ (',' printword_core)=printword
+
+ world
+ ([ (str_sc printstr)
+  , (([ '\s' , 'u' , 'n' , 's' , 'i' , 'g' , 'n' , 'e' , 'd'
+    , '\s' , 'c' , 'h' , 'a' , 'r' , '\s' ]) printstr)
+  , (str_bc printstr) , (str_open printstr)
+  , (bytecode cover (=self =head =list
+    (=byte =list
+     (=byte
+      (byte (([ 1 , 1 , 1 , 1 ]) 2 numeral) and)=hex
+      (hex ('0' ('a' 10 minus) hex 10 eqbig) plus) putc)=puthex
+     ([ head , (([ '0' , 'x' ]) printstr)
+      , ((byte 4 shr) puthex) , (byte puthex)
+      , (list (',' putc) self) ]) iosystem_outseq)
+    cover list) fix)
+  , (str_close printstr)
+  , (str_sc printstr)
+  , (([ '\s' , 'w' , 'o' , 'r' , 'd' , '\s' ]) printstr)
+  , (str_embed printstr) , (str_open printstr)
+  , ((([ '&' , 't' , 'h' , 'u' , 'n' , 'k' , '_' ,
+     's' , 'r' , 'c' , '_' , 'c' , 'o' , 'n' , 's' , 't' ])
+    printstr) printword)
+  , ((([ (str_bc printstr) , (name printstr) , ('+' putc) ,
+     ((entry num2str) printstr) ]) iosystem_outseq) printword)
+  , (embed_list cover (=prim =t =w
+    (((prim str_embed list_append) printstr)
+     printword) w t) list_fold)
+  , ((([ 'N' , 'U' , 'L' , 'L' ]) printstr) '\n' printword_core)
+  , (str_close printstr) ]) iosystem_outseq
+)=to_clang
+
+(([ ([ 'a' , 'b' ]) , ([ 'c' , 'd' , 'e' ]) ])
+ ([ 4 , 3
+  , (([ 1 , 1 , 1 , 0 , 0 , 1 , 0 , 1 ]) 2 numeral)
+  , (([ 4 , 2 ]) decimal) ])
+ (([ 8 , 4 ]) decimal) to_clang)=
+
+((=self =world
+  (=peek =w
+   ([ 'eq' , 'brac' , 'cket' , '\s' , '\n' , '\t' , eof ])
+   ((=str =delim =w
+     =r w delim (str peek cons) r) w self)
+   (=c (=t)= (=r w peek nil r) c peek equal) list_fold
+  ) world getc) fix
+)=read_rest
+
+((=def =ref =brac)=
+
+ (=compile =is_top =world
+  (=r world (=r freevar_list bytecode body_len childs_len
+    (=bracket =src =src_done) r) is_succ r)=
+  (nil 0 nil (=self =inst_rll =stack_depth =rlist =peek =w
+    ((rlist stack_depth inst_rll self) w getc)=nop
+    ([ ((def)= =r ((=rest
+        ((=def = = rest def) cons)=core
+        ((rlist core) (stack_depth one minus) inst_rll self)
+        ((nil core) zero (inst_rll rlist cons) self)
+        zero stack_depth eqbig) w read_rest) 'eq' r)
+     , ((open)= =r ((=is_succ =rst =w
+        (=r w rst false r)
+        (((rlist (= = =brac rst brac) cons)
+          (stack_depth one plus) inst_rll self) w getc)
+        is_succ) w false compile) 'brac' r)
+     , ((close)=
+      =r (=r w ((inst_rll rlist cons) gen_code) true r)
+      ('cket' eof is_top) r)
+     , (=r nop '\s' r) , (=r nop '\n' r) , (=r nop '\t' r)
+     , ((error)= =r (=r w is_top false r) (eof 'cket' is_top) r) ])
+    ((ref)= (=rest
+      (rlist (= =ref = (rest peek cons) ref) cons)
+      (stack_depth one plus) inst_rll self) w read_rest)
+    (=h =t (=c =case t case c peek equal) h) list_fold
+   ) fix) world getc) fix
+)=compile
+
+(=world (=is_succ =rst (=world)=
+  (([ ('?' '!' rst) , '\n' ]) printstr)
+  ((= =childs_len = (=bytecode =embed_list)=
+    childs_len
+    ([ 'a' , 'p' , 'p' , 'l' , 'i' , 'c' , 'a' , 't' , 'i' , 'o' , 'n' ])
+    to_clang) rst) is_succ
+ ) world true compile
+)=compile_application
+
+(((=self =peek =w
+   ([ '\n' , '\s' , '\t' ])
+   (=r w peek r) (=c (=t)= (self w getc) c peek equal) list_fold) fix
+ )=skip_whitespace
+
+ =world
+ ((=self =peek =w
+   (=peek =w
+    ((w ([ '!' , '\n' ]) printstr) (w cover) eof peek equal)
+    ((=is_succ =rst =w
+      (w ([ 'cket' , '?' , '\n' ]) printstr)
+      ((=peek =w
+        (w ([ 'eq' , '?' , '\n' ]) printstr)
+        ((=stem =peek =w (= =
+           (peek self) w
+           (= =ch_len = (=bytecode =env_list)=
+            ch_len stem to_clang) rst
+          ) (w peek self) stem) w read_rest)
+        peek 'eq' equal) skip_whitespace w getc)
+      is_succ) w false compile) 'brac' peek equal
+   ) w peek skip_whitespace) fix) world getc
+)=compile_library
