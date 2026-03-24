@@ -1,0 +1,6 @@
+((=self =num
+  (=back (num back minus) self)=core
+  ((1 core) (2 core) plus) 1 1 num eqbig) fix
+)=fibonacci
+(=w (=num =w ('\n' putc)
+  w ((num fibonacci) num2str) putc string_output_core) w read_unum) main
