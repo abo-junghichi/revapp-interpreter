@@ -5,7 +5,7 @@
 ((([ 1 , 0 , 0 ]) decimal)=max
  zero (=self =count =world
   (count one plus)=count
-  (=base ((=div (=mod)=) undef count base divmod) zero equal)=core
+  (=base ((=div (=mod)=) undefined count base divmod) zero equal)=core
   ((5 core)=b
    ((count num2str)
     ([ 'b' , 'u' , 'z' , 'z' ]) b)
