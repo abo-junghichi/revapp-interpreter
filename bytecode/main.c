@@ -133,7 +133,8 @@ int main(void)
     word stack_cache[STACK_CACHE_SIZE];
     force_state fs;
     int rst;
-    cell_allocator_init(ram + RAM_SIZE, ram, runout);
+    cell_allocator_init(ram + RAM_SIZE,
+			ram + (maxregc_application + 3) / 4, runout);
     fs.forcing = NULL;
     fs.tht = NULL;
     fs.stack_tail = NULL;

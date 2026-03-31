@@ -10,7 +10,6 @@
      (=n =f t f) fvar name strcmp)
     (=n =f n) fvar_list) fix)=find_env
   =fvar_list (=rlist)=
-  (fvar_list list_length)=fvar_org_count
   fvar_list nil zero (=self =bind_count =def_stack =fvar_list
    =rlist
    (=ref_list
@@ -22,16 +21,15 @@
     self (nil true self) def_stack)=ref_core
    (=inst (=rlist)=
     ((brac)= =child
-     ((= = = = (=fvar_list)=) child) ref_core)
+     ((= = = = = (=fvar_list)=) child) ref_core)
     ((ref)= =name ([ name ]) ref_core)
     ((def)= =stem
      ((=fvar_list_rm_stem)=
       (def_stack true cons) (bind_count one plus) self)
      (fvar_list (def_stack false cons) bind_count self)
      fvar_list stem find_env) inst)
-   (((fvar_list list_length) bind_count plus)
-    fvar_org_count minus) rlist) fix
- )=count_new_reg
+   ((fvar_list list_length) bind_count plus) rlist) fix
+ )=count_need_reg
  ((=name =fvar_list =r
    r (fvar_list r) (= undefined)
    fvar_list (=self =fvar_list =n =f =c
@@ -53,7 +51,7 @@
       (inst_list child_list fvar_list t self)
       ((t self) push) h) ((nil self) push) def_stack
     )=def_stack_next
-    ((brac)= =child (=self (=bsd = = = =ref_list
+    ((brac)= =child (=self (=bsd = = = = =ref_list
        (=m_type
         (=id_list =fvar_list
          (inst_list (=z =p =m id_list m_type m) cons)
@@ -101,14 +99,16 @@
     (arg 7 shr) 0 self)
    (tail (arg next_bit gen_header) cons) arg is_msb) fix
  )=emit_shiftin_core
- (=fvar_list =child_list =inst_list
+ (=std =tgt tgt std std tgt eqbig)=bigger
+ (=local_regc =fvar_list =child_list =inst_list
   (=bracket =src =src_done
    (= = src) (=p_type = src src_done undefined p_type)
    (=z_type src bracket src_done z_type)
    (=h = h) undefined inst_list)=bsd
-  (=childs_code_len =childs_bytecode =child_entry_list
+  (=childs_code_len =childs_bytecode =child_entry_list =max_regc
    (=body_len =body_bytecode
-    =r fvar_list (body_bytecode childs_bytecode list_append)
+    =r fvar_list (local_regc max_regc bigger)
+    (body_bytecode childs_bytecode list_append)
     body_len childs_code_len bsd r)
    () zero child_entry_list inst_list (=self
     =inst_list =child_entry_list =body_len =gen_code
@@ -136,42 +136,44 @@
        (=arg (1 4 shl) arg big) emit_shiftin_core) self)
      (=z_type ([ (3 2 1 z_type) ]) self) inst)
     (=r (nil gen_code) body_len r) inst_list) fix)
-  child_list (=self =child_list
-   (=child =child_list (= =child_len =body_len =ch_code =
-     (=len =code =ent_list
-      =r (ent_list (len body_len plus) cons)
+  child_list (=self =child_list (=child =child_list
+    (= =child_len =body_len =ch_code =ch_regc =
+     (=len =code =ent_list =max_regc
+      =r (ch_regc max_regc bigger)
+      (ent_list (len body_len plus) cons)
       (code ch_code list_append)
       (len (body_len child_len plus) plus) r
      ) child_list self) child)
-   (=r nil nil zero r) child_list) fix
+   (=r zero nil nil zero r) child_list) fix
  )=emit
  (=reg_new
   () ((=z =p =m reg_new (=release = = release) p) cons)
   reg_new zero big)=release_middle
- (=r freevar_list bytecode body_len childs_len bsd r)=
+ (=r freevar_list max_regc bytecode body_len childs_len bsd r)=
  =inst_rll
- nil nil nil
+ nil nil nil zero
  inst_rll (= (=z =p =m (= =cket = cket) z) cons) (=self
   =release =inst_rll
-  =fvar_list =child_list =inst_list
+  =max_regc =fvar_list =child_list =inst_list
   (=inst_rlist =inst_rll
-   (inst_rll release_middle self)
-   (inst_rlist fvar_list count_new_reg)=reg_new
+   (inst_rlist fvar_list count_need_reg)=reg_need
+   (reg_need (fvar_list list_length) minus)=reg_new
+   ((reg_need max_regc bigger) inst_rll release_middle self)
    inst_rlist (inst_list reg_new release)
    child_list fvar_list reg_new reg_allot)
-  (inst_list child_list fvar_list emit) inst_rll) fix
+  (inst_list child_list fvar_list max_regc emit) inst_rll) fix
 )=gen_code
 
 (=inst_rll
  (inst_rll nil (=rlist =t
    rlist (t 0 cons)
    (=inst =t
-    (=child ((t 1 cons) ((= = = =bc = bc) child)
+    (=child ((t 1 cons) ((= = = =bc = = bc) child)
       list_append) 9 cons)
     (=name t 2 cons) (=stem t 4 cons) inst)
    list_fold) list_fold
  )=core
- =r nil core 0 0 (=b =s (=d)=) r
+ =r nil zero core 0 0 (=b =s (=d)=) r
 )=gen_code_fake
 
 (putc string_output_core)=printstr
@@ -193,7 +195,7 @@
  list_append
 )=env_letters_list
 
-(=name =entry =bytecode =embed_list =world
+(=name =entry =bytecode =max_regc =embed_list =world
  ([ 's' , 't' , 'a' , 't' , 'i' , 'c'
   , '\s' , 'c' , 'o' , 'n' , 's' , 't' ])=str_sc
  ([ 'b' , 'y' , 't' , 'e' , 'c' , 'o' , 'd' , 'e' , '_' ])=str_bc
@@ -235,7 +237,14 @@
     (((prim str_embed list_append) printstr)
      printword) w t) list_fold)
   , ((([ 'N' , 'U' , 'L' , 'L' ]) printstr) printword_core)
-  , (str_close printstr) ]) iosystem_outseq
+  , (str_close printstr)
+  , (str_sc printstr)
+  , (([ '\s' , 'u' , 'n' , 's' , 'i' , 'g' , 'n' , 'e' , 'd'
+    , '\s' , 'i' , 'n' , 't'
+    , '\s' , 'm' , 'a' , 'x' , 'r' , 'e' , 'g' , 'c' , '_' ])
+   printstr) , (name printstr) , ('eq' putc)
+  , ((max_regc num2str) printstr)
+  , (([ ';' , '\n' ]) printstr) ]) iosystem_outseq
 )=to_clang
 
 (([ ([ 'a' , 'b' ]) , ([ 'c' , 'd' , 'e' ]) ])
@@ -256,7 +265,8 @@
 ((=def =ref =brac)=
 
  (=compile =is_top =world
-  (=r world (=r freevar_list bytecode body_len childs_len
+  (=r world (=r freevar_list max_regc
+    bytecode body_len childs_len
     (=bracket =src =src_done) r) is_succ r)=
   (nil 0 nil (=self =inst_rll =stack_depth =rlist =peek =w
     ((rlist stack_depth inst_rll self) w getc)=nop
@@ -284,7 +294,7 @@
 
 (=world (=is_succ =rst (=world)=
   (([ ('?' '!' rst) , '\n' ]) printstr)
-  ((= =childs_len = (=bytecode =embed_list)=
+  ((= =childs_len = (=bytecode =max_regc =embed_list)=
     childs_len
     ([ 'a' , 'p' , 'p' , 'l' , 'i' , 'c' , 'a' , 't' , 'i' , 'o' , 'n' ])
     to_clang) rst) is_succ
@@ -306,7 +316,7 @@
         (w ([ 'eq' , '?' , '\n' ]) printstr)
         ((=stem =peek =w (= =
            (peek self) w
-           (= =ch_len = (=bytecode =env_list)=
+           (= =ch_len = (=bytecode =max_regc =env_list)=
             ch_len stem to_clang) rst
           ) (w peek self) stem) w read_rest)
         peek 'eq' equal) skip_whitespace w getc)
