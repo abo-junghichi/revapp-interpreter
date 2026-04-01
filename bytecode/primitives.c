@@ -136,7 +136,7 @@ static int verb_getc(word *regfile, size_t *reg_used)
     if (checkwordworld(regfile[0]))
 	return -1;
     if (1 != my_read(my_stdin, &c, 1))
-	i = EOF;
+	i = -1;
     else
 	i = c;
     regfile[1].p = gencellfromint(i);
@@ -173,5 +173,5 @@ static const word embed_##name[] =\
     { { (intptr_t) & thunk_gen_int }, { val } }
 CONST_INT(0, zero);
 CONST_INT(1, one);
-CONST_INT( /* EOF */ -1, eof);
+CONST_INT(-1, eof);
 #include "constint.c"

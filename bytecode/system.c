@@ -1,3 +1,5 @@
+#ifndef SYSTEM_C
+#define SYSTEM_C
 #include <unistd.h>
 #include <fcntl.h>
 #include "system.h"
@@ -30,3 +32,4 @@ int my_close(int fd)
 {
     return close(fd);
 }
+#endif				/* SYSTEM_C */
