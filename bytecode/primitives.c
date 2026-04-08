@@ -76,6 +76,7 @@ static int verb_divmod(word *regfile, size_t *reg_used)
 static const word embed_divmod[] = {
     { (intptr_t) & thunk_verb }, { 2 }, { (intptr_t) & verb_divmod }, { 2 }
 };
+static const unsigned int maxregc_primitives = 4;
 THUNK_CONST(thunk_world, thunk_error_beta);
 static const word word_world[] = { { (intptr_t) & thunk_world } };
 static int checkwordworld(word w)

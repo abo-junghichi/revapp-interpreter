@@ -73,8 +73,12 @@ int main(void)
     word stack_cache[STACK_CACHE_SIZE];
     force_state fs;
     int rst;
-    cell_allocator_init(ram + RAM_SIZE,
-			ram + (maxregc_application + 3) / 4, runout);
+    unsigned int maxregc;
+    if (maxregc_application > maxregc_primitives)
+	maxregc = maxregc_application;
+    else
+	maxregc = maxregc_primitives;
+    cell_allocator_init(ram + RAM_SIZE, ram + (maxregc + 3) / 4, runout);
     fs.forcing = NULL;
     fs.tht = NULL;
     fs.stack_tail = NULL;
