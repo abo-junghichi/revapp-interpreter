@@ -178,23 +178,6 @@
 
 (putc string_output_core)=printstr
 
-(('!' (=self =cur
-   (((=key =cont =r cont key r)=p
-     [ (([ '\\' , '\'' ]) '\'' p)
-     , (([ 'b' , 'r' , 'a' , 'c' ]) 'brac' p)
-     , (([ 'c' , 'k' , 'e' , 't' ]) 'cket' p)
-     , (([ 'e' , 'q' ]) 'eq' p)
-     , (([ '\\' , '\\' ]) '\\' p) ])=exception
-    (=cur
-     exception ([ cur ])
-     (=p =t (=key =cont t cont key cur equal) p) list_fold
-    )=ele
-    ((cur one plus) self) (cur ele) cons)
-   nil cur '~' big) fix)
- ([ ([ '\\' , 't' ]) , ([ '\\' , 'n' ]) , ([ '\\' , 's' ]) ])
- list_append
-)=env_letters_list
-
 (=name =entry =bytecode =max_regc =embed_list =world
  ([ 's' , 't' , 'a' , 't' , 'i' , 'c'
   , '\s' , 'c' , 'o' , 'n' , 's' , 't' ])=str_sc
@@ -246,12 +229,6 @@
   , ((max_regc num2str) printstr)
   , (([ ';' , '\n' ]) printstr) ]) iosystem_outseq
 )=to_clang
-
-(([ ([ 'a' , 'b' ]) , ([ 'c' , 'd' , 'e' ]) ])
- ([ 4 , 3
-  , (([ 1 , 1 , 1 , 0 , 0 , 1 , 0 , 1 ]) 2 numeral)
-  , (([ 4 , 2 ]) decimal) ])
- (([ 8 , 4 ]) decimal) to_clang)=
 
 ((=self =world
   (=peek =w
