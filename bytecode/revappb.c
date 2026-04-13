@@ -58,8 +58,7 @@ typedef struct {
     word *(*release_resume)(cell *);
 } thunk_type;
 static cell *thunk_release_light(cell *prev, word **thp,
-				 word *(**resume) (cell *)
-    )
+				 word *(**resume) (cell *))
 {
     const thunk_type *tht = (*thp)->c;
     word *child = tht->release(*thp);
