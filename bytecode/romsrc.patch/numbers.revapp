@@ -7,7 +7,7 @@
 (-- numbers --)=
 
 zero=0
-(0 one plus)=1
+one=1
 (2 ... 10)=
 (=base (=num_list)=
  0 (=self =done =num_list
