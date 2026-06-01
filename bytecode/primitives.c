@@ -58,7 +58,24 @@ BINARYOPINT(*, mul);
 BINARYOPINT(&, and);
 BINARYOPINT(|, or);
 BINARYOPINT(^, xor);
+#ifdef __GNUC__
+/* gcc treats shift-right on signed with sign extension.
+ * See [ info gcc -> C Implementation -> Integers implementation ]. */
 BINARYOPINT(>>, shr);
+#else
+static int verb_shr(word *regfile, size_t *reg_used)
+{
+    unsigned int act, pas, sign_bit = ~((unsigned int) ~0 >> 1);
+    if (getintfromcell(regfile[0], &act)
+	|| getintfromcell(regfile[1], &pas))
+	return -1;
+    regfile[2].p =
+	gencellfromint(((pas ^ sign_bit) >> act) - (sign_bit >> act));
+    *reg_used = 3;
+    return 0;
+}
+BINARYOP(shr);
+#endif				/* __GNUC__ */
 BINARYOPINT(<<, shl);
 static int verb_divmod(word *regfile, size_t *reg_used)
 {
