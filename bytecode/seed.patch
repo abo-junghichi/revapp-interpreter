@@ -1,23 +1,24 @@
 diff '--color=auto' -r -u seed.org/main.c seed/main.c
---- seed.org/main.c	2026-06-01 23:50:37.640572373 +0900
-+++ seed/main.c	2026-06-02 00:11:32.783702510 +0900
-@@ -34,6 +34,28 @@
+--- seed.org/main.c	2026-06-02 10:27:16.834967831 +0900
++++ seed/main.c	2026-06-02 10:26:09.836142810 +0900
+@@ -1,6 +1,7 @@
+ #include <stdio.h>
+ #include "revappi.h"
+ #include "romsrc.c"
++#include "../shra.c"
+ static const thunk_type thunk_int =
+     { beta_undefined, thunk_nop_retain, thunk_nop_release };
+ static const thunk_type *const dist_int[] = { &thunk_int, NULL };
+@@ -34,6 +35,20 @@
  BINARYOPINT(+, plus);
  BINARYOPINT(-, minus);
  BINARYOPINT(*, mul);
 +BINARYOPINT(&, and);
 +BINARYOPINT(|, or);
 +BINARYOPINT(^, xor);
-+#ifdef __GNUC__
-+/* gcc treats shift-right on signed with sign extension.
-+ * See [ info gcc -> C Implementation -> Integers implementation ]. */
-+BINARYOPINT(>>, shr);
-+#else
 +static size_t beta_prim_shr(word *r)
 +{
-+    unsigned int act = word_to_int(r[1]), pas =
-+	word_to_int(r[0]), sign_bit = ~((unsigned int) ~0 >> 1);
-+    r[0] = int_to_word(((pas ^ sign_bit) >> act) - (sign_bit >> act));
++    r[0] = int_to_word(shra(word_to_int(r[0]), word_to_int(r[1])));
 +    r[1].thp = r[2].thp;
 +    return 0;
 +}
@@ -25,12 +26,11 @@ diff '--color=auto' -r -u seed.org/main.c seed/main.c
 +    PIP_POP_THUNK, PIP_POP(int), PIP_POP(int),
 +    PIP_CALL(shr), PIP_DIST(int)
 +};
-+#endif				/* __GNUC__ */
 +BINARYOPINT(<<, shl);
  static const thunk_type *const dist_intint[] =
      { &thunk_int, &thunk_int, NULL };
  static const thunk_type *const dist_thunk[] = { NULL };
-@@ -138,6 +160,8 @@
+@@ -138,6 +153,8 @@
      { PIP_POP_THUNK, PIP_POP(world), PIP_CALL(getc), PIP_DIST(getc) };
  static const prim_env_member primitives[] = {
      PRIMITIVE(plus), PRIMITIVE(minus), PRIMITIVE(mul), PRIMITIVE(divmod),
@@ -39,7 +39,7 @@ diff '--color=auto' -r -u seed.org/main.c seed/main.c
      PRIMITIVE(zero), PRIMITIVE(one), PRIMITIVE(eof),
      PRIMITIVE(equal), PRIMITIVE(big), PRIMITIVE(eqbig),
      PRIMITIVE(startworld), PRIMITIVE(forkworld), PRIMITIVE(joinworld),
-@@ -148,7 +172,7 @@
+@@ -148,7 +165,7 @@
      PRIMITIVE(getc),
      PRIMITIVE_END
  };
@@ -49,8 +49,8 @@ diff '--color=auto' -r -u seed.org/main.c seed/main.c
  static int place_source(const char *path)
  {
 diff '--color=auto' -r -u seed.org/romsrc/primitives.revapp seed/romsrc/primitives.revapp
---- seed.org/romsrc/primitives.revapp	2026-06-01 23:50:37.640572373 +0900
-+++ seed/romsrc/primitives.revapp	2026-06-01 23:39:47.844587099 +0900
+--- seed.org/romsrc/primitives.revapp	2026-06-02 10:27:16.844967656 +0900
++++ seed/romsrc/primitives.revapp	2026-06-02 10:22:42.169784719 +0900
 @@ -17,6 +17,11 @@
  (plus binaryopint)=plus
  (minus binaryopint)=minus
