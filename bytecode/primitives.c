@@ -61,7 +61,7 @@ BINARYOPINT(|, or);
 BINARYOPINT(^, xor);
 static int verb_shr(word *regfile, size_t *reg_used)
 {
-    unsigned int act, pas;
+    int act, pas;
     if (getintfromcell(regfile[0], &act)
 	|| getintfromcell(regfile[1], &pas))
 	return -1;
