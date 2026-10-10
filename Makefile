@@ -5,7 +5,7 @@ HOSTCC=$(CC) -O3 -DNDEBUG
 
 clean:
 	rm *.out *.o romsrc.c
-	(cd romsrc ; make)
+	(cd romsrc ; make clean)
 all: revappi.out
 
 romsrc/romsrc.revapp:
