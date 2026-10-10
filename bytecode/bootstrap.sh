@@ -2,14 +2,15 @@
 
 CC='gcc -Wall -pedantic -Wextra -Wstrict-aliasing=1'
 
-( cd ../romsrc ; make clean )
 cp -r ../romsrc .
+( cd romsrc ; make clean )
+mkdir seed
+cp -r romsrc seed/
 cp romsrc.patch/* romsrc/
 ( cd romsrc ; make romsrc.revapp )
-mkdir seed
 (
 	cd seed
-	for f in revappi.h revappi.c main.c romsrc Makefile img2c.c
+	for f in revappi.h revappi.c main.c Makefile img2c.c
 	do
 		cp -r ../../$f .
 	done
